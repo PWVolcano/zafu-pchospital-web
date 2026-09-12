@@ -1,0 +1,154 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+import { Icon } from "@/components/ui/Icon";
+import { mainNav } from "@/config/navigation";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
+
+/**
+ * Header —— 全站统一导航
+ *
+ * 严格对应设计基准的两套表现，二者不重复实现：
+ * - 桌面（>= 1100px）：左侧固定竖排索引栏 `.rail`
+ * - 移动 / 平板：顶部栏 `.topbar` + 全屏索引浮层 `.menu`
+ *
+ * 断点由设计系统统一决定，页面不要自行改动。
+ * 导航项来自 src/config/navigation.ts，新增页面只改配置。
+ */
+
+function isCurrent(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function Header() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
+
+  /* 路由变化后收起浮层 */
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  /* 浮层打开时锁定滚动、把焦点交给关闭按钮；关闭时归还焦点 */
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+
+    if (open) {
+      closeButtonRef.current?.focus();
+    } else if (wasOpenRef.current) {
+      openButtonRef.current?.focus();
+    }
+    wasOpenRef.current = open;
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  /* Esc 关闭 */
+  useEffect(() => {
+    if (!open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  return (
+    <>
+      {/* ------------------------------------------------ 移动端顶栏 */}
+      <header className="topbar">
+        <Link className="topbar__brand" href="/">
+          ZAFU<em>·</em>PC HOSPITAL
+        </Link>
+        <button
+          ref={openButtonRef}
+          className="topbar__toggle"
+          type="button"
+          aria-expanded={open}
+          aria-controls="site-menu"
+          onClick={() => setOpen(true)}
+        >
+          <Icon name="menu" />
+          索引
+        </button>
+      </header>
+
+      {/* -------------------------------------------- 移动端索引浮层 */}
+      <div className="menu" id="site-menu" data-open={open ? "true" : "false"}>
+        <button
+          ref={closeButtonRef}
+          className="menu__close"
+          type="button"
+          onClick={() => setOpen(false)}
+        >
+          <Icon name="close" />
+          关闭
+        </button>
+
+        <nav aria-label="站点导航">
+          <ol className="menu__list">
+            {mainNav.map((item, i) => (
+              <li
+                className="menu__item"
+                key={item.href}
+                style={{ "--i": i } as React.CSSProperties}
+              >
+                <Link
+                  className="menu__link"
+                  href={item.href}
+                  aria-current={isCurrent(pathname, item.href) ? "page" : undefined}
+                >
+                  <span>{item.index}</span>
+                  <strong>{item.label}</strong>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
+
+      {/* ---------------------------------------------- 桌面左侧索引栏 */}
+      <aside className="rail">
+        <Link className="rail__brand" href="/" aria-label={`${siteConfig.name} · 回到首页`}>
+          <b>PC</b>
+          <span>ZAFU</span>
+        </Link>
+
+        <nav aria-label="站点导航">
+          <ol className="rail__list">
+            {mainNav.map((item) => (
+              <li key={item.href}>
+                <Link
+                  className={cn("rail__link")}
+                  href={item.href}
+                  aria-current={isCurrent(pathname, item.href) ? "page" : undefined}
+                  title={`${item.index} ${item.label} · ${item.labelEn}`}
+                >
+                  <span className="rail__num">{item.index}</span>
+                  <span className="rail__label">{item.shortLabel}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <div className="rail__meta" aria-hidden="true">
+          <i />
+          <span>ZAFU</span>
+        </div>
+      </aside>
+    </>
+  );
+}
