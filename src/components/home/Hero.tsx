@@ -3,7 +3,7 @@ import { Container } from "@/components/layout/Container";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Reveal } from "@/components/ui/Reveal";
-import { heroContent } from "@/config/home";
+import { heroActions, heroContent } from "@/config/home";
 import { revealIndex } from "@/lib/utils";
 
 /**
@@ -14,6 +14,8 @@ import { revealIndex } from "@/lib/utils";
  */
 
 export function Hero() {
+  const { repair, docs } = heroActions;
+
   return (
     <section className="hero" id="hero" aria-labelledby="hero-title">
       <span className="hero__glyph" aria-hidden="true">
@@ -52,11 +54,16 @@ export function Hero() {
             </Reveal>
 
             <Reveal className="hero__actions" index={2}>
-              <Button variant="solid" icon="book" href="/docs">
-                查阅技术文档
-              </Button>
-              <Button variant="ghost" href="#services" trailingIcon="chevronRight">
-                查看服务范围
+              {repair.href ? (
+                <Button variant="solid" href={repair.href}>
+                  {repair.label}
+                </Button>
+              ) : (
+                /* href 为空：对应页面尚未就绪，渲染成原生 button，点击不跳转 */
+                <Button variant="solid">{repair.label}</Button>
+              )}
+              <Button variant="ghost" href={docs.href} trailingIcon="chevronRight">
+                {docs.label}
               </Button>
             </Reveal>
 
