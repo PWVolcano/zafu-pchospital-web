@@ -40,17 +40,71 @@ function fail(message) {
   throw new Error(`[docs:build] ${message}`);
 }
 
-function assertSource() {
-  if (!existsSync(sourceRoot)) {
+const mdbookBin = process.env.MDBOOK_BIN || "mdbook";
+
+/**
+ * 文档源码：默认自动浅克隆到 .docs-source/，所以干净克隆的仓库也能直接构建。
+ * 想用本地已有的检出就设 DOCS_SOURCE_DIR；完全离线用 DOCS_OFFLINE=1 跳过克隆。
+ */
+function ensureSource() {
+  if (existsSync(sourceRoot)) return;
+
+  if (process.env.DOCS_SOURCE_DIR) {
     fail(
-      `文档源码目录不存在：${sourceRoot}\n` +
-        "请设置 DOCS_SOURCE_DIR，或将文档仓库检出到 .docs-source/。",
+      `DOCS_SOURCE_DIR 指向的目录不存在：${sourceRoot}\n` +
+        "请先检出文档仓库，或去掉该环境变量让脚本自动克隆。",
     );
   }
-  if (!existsSync(bookConfigPath)) fail(`缺少 mdBook 配置：${bookConfigPath}`);
-  if (!existsSync(summaryPath)) fail(`缺少文档目录：${summaryPath}`);
-  if (!existsSync(themeCssPath)) fail(`缺少官网 mdBook 主题样式：${themeCssPath}`);
-  if (!existsSync(themeJsPath)) fail(`缺少官网 mdBook 主题脚本：${themeJsPath}`);
+  if (process.env.DOCS_OFFLINE === "1") {
+    fail(
+      `文档源码目录不存在：${sourceRoot}\n` +
+        "DOCS_OFFLINE=1 时不会联网克隆。请把文档仓库检出到该目录，或用 DOCS_SOURCE_DIR 指定路径。",
+    );
+  }
+
+  console.log(`[docs:build] 未找到文档源码，浅克隆 ${repoUrl} → ${sourceRoot}`);
+  try {
+    execFileSync("git", ["clone", "--depth", "1", "--branch", "main", repoUrl, sourceRoot], {
+      cwd: projectRoot,
+      stdio: "inherit",
+    });
+  } catch {
+    fail(
+      `克隆文档仓库失败：${repoUrl}\n` +
+        "  请检查网络；或把文档仓库手动检出到 .docs-source/；\n" +
+        "  或用 DOCS_SOURCE_DIR 指向已有的检出；完全离线时用 DOCS_OFFLINE=1（仍需先有源码）。",
+    );
+  }
+}
+
+/** 一次列全所有前置问题，而不是撞一个报一个（装完 mdbook 才发现还缺源码） */
+function preflight() {
+  /* 先查本机与仓库内的条件（便宜、不联网）：这些不满足就没必要下载源码 */
+  const problems = [];
+  if (!existsSync(themeCssPath)) problems.push(`缺少官网 mdBook 主题样式：${themeCssPath}`);
+  if (!existsSync(themeJsPath)) problems.push(`缺少官网 mdBook 主题脚本：${themeJsPath}`);
+
+  try {
+    execFileSync(mdbookBin, ["--version"], { stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    problems.push(
+      `找不到 mdBook 可执行文件：${mdbookBin}\n` +
+        "    二选一安装：\n" +
+        "      · cargo install mdbook（需要 Rust 工具链）\n" +
+        "      · 或从 https://github.com/rust-lang/mdBook/releases 下载对应平台二进制，\n" +
+        "        再用 MDBOOK_BIN 指过去：MDBOOK_BIN=/path/to/mdbook pnpm build",
+    );
+  }
+
+  if (problems.length > 0) fail(`前置条件不满足：\n  - ${problems.join("\n  - ")}`);
+
+  /* 本机条件齐了再取源码：缺省会自动浅克隆 */
+  ensureSource();
+
+  const missing = [];
+  if (!existsSync(bookConfigPath)) missing.push(`缺少 mdBook 配置：${bookConfigPath}`);
+  if (!existsSync(summaryPath)) missing.push(`缺少文档目录：${summaryPath}`);
+  if (missing.length > 0) fail(`文档源码不完整：\n  - ${missing.join("\n  - ")}`);
 }
 
 function toPosix(value) {
@@ -177,7 +231,12 @@ function customizeHtml() {
     `<a href="/docs" class="pc-hospital-return" title="返回电脑医院官网" ${marker}>` +
     `<span aria-hidden="true">←</span><span>电脑医院官网</span></a>`;
   const themeBootstrapMarker = 'data-pc-hospital-theme-bootstrap="true"';
-  const themeBootstrap = `<script ${themeBootstrapMarker}>(function(){try{var mode=localStorage.getItem("zafu-pchospital:theme-mode");if(mode==="dark"){localStorage.setItem("mdbook-theme","coal")}else if(mode==="normal"){localStorage.setItem("mdbook-theme","light")}}catch(e){}})();</script>`;
+  /* 主题引导：解析顺序必须与官网 src/lib/theme.ts 完全一致 ——
+       本地存过明确模式 → 用它；否则跟随 prefers-color-scheme；再否则回落到正常模式。
+     漏掉「跟随系统」那条会出现：首次访客系统是深色 → 官网深色、文档站却是浅色。
+     存储键与官网共用（同域 localStorage）；tools/check-theme-palette.mjs
+     会校验这个键在 build-docs.mjs 与 src/lib/theme.ts 里一致。 */
+  const themeBootstrap = `<script ${themeBootstrapMarker}>(function(){try{var k="zafu-pchospital:theme-mode",m=localStorage.getItem(k);if(m!=="dark"&&m!=="normal"){m=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"normal"}localStorage.setItem("mdbook-theme",m==="dark"?"coal":"light")}catch(e){}})();</script>`;
   let injected = 0;
 
   for (const htmlPath of walkFiles(outputRoot).filter((file) => file.endsWith(".html"))) {
@@ -271,7 +330,7 @@ function countEntries(nodes) {
   return { ready, pending };
 }
 
-assertSource();
+preflight();
 
 cpSync(sourceRoot, buildSourceRoot, {
   recursive: true,
@@ -293,7 +352,7 @@ mkdirSync(outputRoot, { recursive: true });
 
 console.log(`[docs:build] source: ${sourceRoot}`);
 execFileSync(
-  process.env.MDBOOK_BIN || "mdbook",
+  mdbookBin,
   ["build", buildSourceRoot, "--dest-dir", outputRoot],
   {
     cwd: projectRoot,

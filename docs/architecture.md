@@ -71,7 +71,17 @@
 │       └── doc-manifest.json  # 文档仓库清单（由文档仓库构建脚本生成）
 │
 ├── public/
-│   └── fonts/archivo-latin-wdth.woff2   # 品牌可变字体
+│   ├── fonts/archivo-latin-wdth.woff2   # 品牌可变字体
+│   └── handbook/              # 【生成物】站内技术文档，由 pnpm docs:build 产出，已 gitignore
+│
+├── tools/                     # 构建工具与本地验证脚本（不参与运行时）
+│   ├── build-docs.mjs         # 站内文档构建：mdBook 产物 → public/handbook/ + 生成清单
+│   ├── mdbook-theme/          # 官网同款 mdBook 主题（pc-hospital.css / pc-hospital.js）
+│   ├── check-theme-palette.mjs# 校验官网与文档站的调色板没有漂移
+│   ├── inspect.mjs            # 页面诊断与截图（CDP）
+│   └── console-probe.mjs      # 收集 console 报错与运行时异常（CDP）
+│
+├── .docs-source/              # 【本地产物】文档仓库检出，docs:build 缺省时自动浅克隆，已 gitignore
 │
 └── zafu-pchospital-site/      # 【只读】设计基准 Demo，不再改动
 ```
@@ -149,12 +159,50 @@
 ### 3.8 `public/` —— 静态资源
 
 - `fonts/`：品牌字体
+- `handbook/`：**生成物**，站内技术文档（mdBook 产物），由 `pnpm docs:build` 写入，
+  已 gitignore。不要手改里面的任何文件，也不要提交它。
 - 其余图片、图标按需新增
 
 规则：
 
 - 图标优先使用 `components/ui/Icon.tsx` 的内联 SVG（24 格 / stroke 2 / round 端点），不要引入图标库。
 - 不要往 `public/` 放源码里可以 import 的资源。
+
+### 3.9 `tools/` —— 构建工具与本地验证
+
+放**不参与运行时**的脚本：文档构建、调色板校验、基于 CDP 的本地诊断。
+
+#### 站内技术文档（mdBook）
+
+技术文档的正文维护在独立仓库 `ZAFU-PCHospital-Doc`，在**官网构建期**生成到同域
+`public/handbook/`，`/docs` 页只指向站内路径，不再外链 GitHub。
+
+```text
+ZAFU-PCHospital-Doc ──► .docs-source/ ──► mdbook build ──► public/handbook/
+        （自动浅克隆）      （本地产物）      + 官网定制主题     （生成物，已 gitignore）
+```
+
+- `build-docs.mjs`：唯一入口。缺 `.docs-source/` 时**自动浅克隆**；产出 mdBook 正文
+  与 `src/data/doc-manifest.json`。
+- `mdbook-theme/`：官网同款的 mdBook 主题。mdBook 只吃静态 CSS，无法引用官网变量，
+  所以这里的 `--pc-*` 是 `globals.css` 主题层的**拷贝** —— 见下一条。
+- 环境变量：`DOCS_SOURCE_DIR`（指向已有的文档检出）、`MDBOOK_BIN`（mdbook 可执行文件）、
+  `DOCS_OFFLINE=1`（禁止联网克隆）、`DOCS_SHA`（覆盖清单里记录的版本号）。
+
+`pnpm build` **已包含** `docs:build`，所以标准构建一定产出完整站点；
+只想快速编译官网源码时用 `pnpm build:site`。
+
+#### 调色板一致性
+
+`tools/check-theme-palette.mjs` 校验官网与文档站两份调色板逐值一致，
+并校验主题存储键在 `src/lib/theme.ts` 与 `build-docs.mjs` 里相同。
+它挂在 `pnpm lint` 后面（也可单独跑 `pnpm check:palette`）——
+**改 `globals.css` 的主题层时必须同步改 `tools/mdbook-theme/pc-hospital.css` 对应主题块**，
+否则 lint 直接失败。
+
+#### 本地诊断
+
+`inspect.mjs` / `console-probe.mjs` 基于 Chrome DevTools Protocol，用法见 README「本地验证」。
 
 ---
 

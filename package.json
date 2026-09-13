@@ -9,11 +9,12 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "build:full": "pnpm docs:build && pnpm build",
+    "build": "pnpm docs:build && next build",
+    "build:site": "next build",
     "docs:build": "node tools/build-docs.mjs",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . && node tools/check-theme-palette.mjs",
+    "check:palette": "node tools/check-theme-palette.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

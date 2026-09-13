@@ -159,10 +159,18 @@ git switch -c feat/xxx  # 确认不在 main 上直接开发
 ## 7. 完工前必做
 
 ```bash
-pnpm lint      # 必须 0 error
-pnpm build     # 必须成功
+pnpm lint      # 必须 0 error（除 ESLint 外还会校验主题调色板一致性）
+pnpm build     # 必须成功；已包含站内文档构建，需要 mdBook（见 README「站内技术文档」）
 pnpm dev       # 手动检查 Desktop / Mobile / Console
 ```
+
+> **`pnpm build` 已包含 `docs:build`**，所以标准构建一定产出完整的站内文档。
+> 不要为了绕开 mdBook 而改用 `pnpm build:site` 就宣布完工 —— 它只编译官网，
+> `/handbook/` 会缺失，`/docs` 页的链接全部 404。只改页面、本机确实没有 mdBook 时
+> 可以用它做快速自检，但必须在 PR 描述里说明「未验证文档构建」。
+>
+> **改了 `globals.css` 的主题层，必须同步改 `tools/mdbook-theme/pc-hospital.css`
+> 的对应主题块**，否则 `pnpm lint` 会直接失败。
 
 自检清单：
 
