@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { Icon } from "@/components/ui/Icon";
 import { mainNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
@@ -18,6 +19,9 @@ import { cn } from "@/lib/utils";
  *
  * 断点由设计系统统一决定，页面不要自行改动。
  * 导航项来自 src/config/navigation.ts，新增页面只改配置。
+ *
+ * 显示模式切换入口（ThemeSwitcher）挂在两处导航的收尾位置：
+ * 桌面索引栏底部、移动端顶栏右侧，两处共用同一份状态。
  */
 
 function isCurrent(pathname: string, href: string): boolean {
@@ -117,6 +121,16 @@ export function Header() {
             ))}
           </ol>
         </nav>
+
+        {/* 显示模式切换：放在浮层里而不是顶栏 —— 顶栏在窄屏已被品牌字标与
+            「索引」按钮占满，再加一个入口会挤压出横向溢出。 */}
+        <div
+          className="menu__item menu__foot"
+          style={{ "--i": mainNav.length } as React.CSSProperties}
+        >
+          <span className="menu__foot-label">显示模式</span>
+          <ThemeSwitcher variant="inline" />
+        </div>
       </div>
 
       {/* ---------------------------------------------- 桌面左侧索引栏 */}
@@ -144,9 +158,12 @@ export function Header() {
           </ol>
         </nav>
 
-        <div className="rail__meta" aria-hidden="true">
-          <i />
-          <span>ZAFU</span>
+        <div className="rail__foot">
+          <ThemeSwitcher variant="rail" />
+          <div className="rail__meta" aria-hidden="true">
+            <i />
+            <span>ZAFU</span>
+          </div>
         </div>
       </aside>
     </>

@@ -26,6 +26,13 @@
 
 ## 1. Colors
 
+> **本节描述的是「深色模式」所对应的主题 `black-yellow`。**
+> 站点现在有两套主题：语义令牌的名称完全相同，取值不同，
+> 由 `<html data-theme>` 决定。两套取值与完整主题架构见 **第 9 节**。
+>
+> ⚠️ 组件一律只使用语义令牌（`var(--accent)` 等），**不要写死本节里的色值** ——
+> 写死之后切到另一个模式就会出现颜色冲突或看不见的文字。
+
 基调：**工业极简 · 深色石墨 + 单一信号黄强调色**。
 所有中性色统一带 **95° 微暖色相**，与信号黄同源，避免灰得发蓝。
 
@@ -387,3 +394,210 @@
 
 > 目标：任何人拉取代码后，只看本文件就能知道界面应该长什么样，
 > 以及自己写的页面有没有跑偏。
+
+---
+
+## 9. Theme Architecture
+
+### 9.1 三个概念
+
+```text
+Mode      用户能看到的开关        normal | dark
+Theme     具体视觉方案            swiss-cobalt | black-yellow
+Mapping   Mode → Theme            src/config/theme.ts 的 siteThemeConfig
+```
+
+界面**只暴露 Mode**。`Swiss Cobalt`、`Black Yellow` 这类主题名属于后台与文档，
+不出现在任何页面文案里。
+
+解析链路：
+
+```text
+用户点「深色」
+      ↓
+siteThemeConfig.dark                    ← 管理员配置层（未来改为数据库读取）
+      ↓
+"black-yellow"
+      ↓
+<html data-mode="dark" data-theme="black-yellow">
+      ↓
+CSS 主题层的语义令牌
+      ↓
+所有组件（组件不认识主题，只认识令牌）
+```
+
+**页面结构与主题视觉完全解耦。** 主题只决定颜色、圆角、边框、排版尺度、装饰强度；
+不决定内容、区块顺序、Grid 主结构、路由、权限、数据或业务逻辑。
+因此**永远不要**出现下面这种写法：
+
+```tsx
+// ❌ 禁止：为两个模式维护两套页面
+if (theme === "normal") return <NormalAboutPage />;
+return <DarkAboutPage />;
+```
+
+### 9.2 语义令牌
+
+组件只使用语义令牌，不要判断当前是什么模式。
+
+| 语义           | 令牌                                     | Tailwind                                     |
+| -------------- | ---------------------------------------- | -------------------------------------------- |
+| 页面底色       | `--bg`                                   | `bg-bg`                                      |
+| 更深一层底     | `--bg-deep`                              | `bg-bg-deep`                                 |
+| 面板 / 表面    | `--surface-1` … `--surface-3`            | `bg-surface-1` …                             |
+| 正文 / 标题    | `--ink`                                  | `text-ink`                                   |
+| 次级正文       | `--ink-2`                                | `text-ink-2`                                 |
+| 说明文字       | `--ink-3`                                | `text-ink-3`                                 |
+| 元信息 / 标签  | `--ink-4`                                | `text-ink-4`                                 |
+| 强调（主色）   | `--accent`                               | `text-accent` / `bg-accent`                  |
+| 主色深色变体   | `--accent-deep`                          | `text-accent-deep`                           |
+| 主色底上的文字 | `--accent-on`                            | `text-accent-on`                             |
+| 主色淡底       | `--accent-wash`                          | `bg-accent-wash`                             |
+| 主色描边       | `--accent-line`                          | `border-accent-line`                         |
+| 描边           | `--line` / `--line-soft` / `--line-strong` | `border-line` / `border-line-soft` / `border-line-strong` |
+
+**禁止**：
+
+```css
+color: #2457ff; /* ❌ 写死某个主题的具体色值 */
+background: #ffd400; /* ❌ */
+```
+
+```tsx
+theme === "dark" ? "#FFD400" : "#2457FF"; // ❌ 组件里判断主题再挑颜色
+```
+
+**应该**：
+
+```css
+color: var(--accent);
+background: var(--bg);
+border-color: var(--line);
+```
+
+判断标准：组件代码里出现任何一个具体色值，就是在脱离主题系统。
+
+### 9.3 主题层的位置
+
+色值的唯一来源是 `src/app/globals.css` 顶部的两段：
+
+| 选择器                        | 内容                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `:root`                       | 主题无关令牌 + **默认主题**（normal → `swiss-cobalt`）的语义色，同时作为无脚本兜底 |
+| `html[data-theme="black-yellow"]` | 深色主题（dark）的语义色覆盖                                            |
+
+`src/config/theme.ts` **只登记主题身份与映射关系，不存放色值**。
+两者的对应关系是「ThemeId ↔ `html[data-theme="<id>"]`」。
+
+### 9.4 两套主题的实际取值
+
+| 语义令牌                     | normal / `swiss-cobalt`      | dark / `black-yellow`        |
+| ---------------------------- | ---------------------------- | ---------------------------- |
+| `--bg`                       | `#f5f5f2` 暖白纸面           | `oklch(14.5% 0.006 95)` 石墨 |
+| `--bg-deep`                  | `#edece7`                    | `oklch(11.5% 0.006 95)`      |
+| `--surface-1`                | `#ffffff`                    | `oklch(18% 0.006 95)`        |
+| `--surface-2`                | `#efeee9`                    | `oklch(22% 0.007 95)`        |
+| `--line`                     | `#d8d8d4`                    | `oklch(31% 0.008 95)`        |
+| `--line-soft`                | `#e6e6e1`                    | `oklch(23% 0.007 95)`        |
+| `--line-strong`              | `#8a8a85`                    | `oklch(52% 0.009 95)`        |
+| `--ink`                      | `#171717` 炭黑               | `oklch(96% 0.008 95)`        |
+| `--ink-2`                    | `#3d3d3b`                    | `oklch(82% 0.009 95)`        |
+| `--ink-3`                    | `#5f5f5d`                    | `oklch(68% 0.009 95)`        |
+| `--ink-4`                    | `#70706e`                    | `oklch(60% 0.009 95)`        |
+| `--accent`                   | `#2457ff` 钴蓝               | `oklch(85% 0.175 99)` 信号黄 |
+| `--accent-deep`              | `#1c44d6`                    | `oklch(70% 0.155 97)`        |
+| `--accent-on`                | `#ffffff`                    | `oklch(17% 0.03 99)`         |
+| `color-scheme`               | `light`                      | `dark`                       |
+
+`swiss-cobalt` 取自实验分支 `style-about-editorial-test` 已验证的
+「暖白 + 炭黑 + 钴蓝 · Swiss Editorial / Technical Editorial」方向。
+其中 `--ink-3` / `--ink-4` 两档比实验原值（`#737373` / `#8f8f8b`）更深：
+原值是按纯白 `#ffffff` 计算的，落在实际纸面 `#f5f5f2` 上只有 4.34:1 / 2.97:1，
+达不到 AA，因此重新按实际底色配了一组（见 9.6）。
+
+### 9.5 主题还能控制什么：视觉令牌
+
+主题不只是颜色。`globals.css` 里另有一组可被主题覆盖的视觉令牌：
+
+| 令牌                     | 用途                      | normal                   | dark                    |
+| ------------------------ | ------------------------- | ------------------------ | ----------------------- |
+| `--r-frame`              | 图集 / 照片框圆角         | `0`（直角，接近印刷品）  | `var(--r-mid)`          |
+| `--t-page-title`         | 内页页头主标题字号        | `clamp(3rem, 8vw, 6.25rem)` 海报级 | `var(--t-2xl)` 常规 |
+| `--page-title-leading`   | 同上，行高                | `1.04`                   | `1.14`                  |
+| `--page-title-tracking`  | 同上，字距                | `-0.025em`               | `-0.015em`              |
+| `--deco-grid-line`       | 背景走线栅格的线色        | `var(--line)`            | `var(--line-soft)`      |
+| `--deco-scan`            | 扫描质感带                | 钴蓝 5%                  | 信号黄 2.8%             |
+| `--deco-watermark`       | 首页水印字形描边          | 钴蓝 17%                 | 信号黄 16%              |
+| `--deco-reticle-blend`   | 指针准星的混合模式        | `multiply`               | `screen`                |
+| `--rail-panel`           | 左侧索引栏面板的渐变起点  | `var(--surface-1)` 做亮  | `var(--bg-deep)` 做暗   |
+
+> `--deco-reticle-blend` 是个例子：准星原本写死 `mix-blend-mode: screen`，
+> 这在深色底上成立、在暖白底上会让准星彻底看不见。装饰类取值必须同样令牌化。
+>
+> `--rail-panel` 是另一个例子：索引栏原本写死 `gradient(--bg-deep → --bg)`。
+> 深色主题下面板比页面更深是成立的；但浅色主题里 `--ink-4` 在 `--bg-deep`
+> 上只有 4.20:1，栏内导航文字会掉出 AA。**浅色主题必须把面板做亮，而不是做暗。**
+
+**主题不控制**：区块顺序、Grid 主结构、DOM、交互、数据、路由、权限。
+否则多主题会演变成多套网站。
+
+主题**可以**调整 `--d-*` / `--ease-*` 动效令牌，但当前两套主题没有差异，
+因此它们仍留在 `:root` 的主题无关段里。
+
+### 9.6 对比度（实测）
+
+两套取值按 WCAG 相对亮度公式算出的结果（正文门槛 4.5:1，控件边界 3:1）：
+
+| 组合                                  | normal     | dark       |
+| ------------------------------------- | ---------- | ---------- |
+| `--ink` on `--bg`                     | 16.41:1 ✅ | 17.64:1 ✅ |
+| `--ink-2` on `--bg`                   | 9.97:1 ✅  | 11.35:1 ✅ |
+| `--ink-3` on `--bg`                   | 5.86:1 ✅  | 6.86:1 ✅  |
+| `--ink-4` on `--bg`                   | 4.54:1 ✅  | 5.01:1 ✅  |
+| `--ink-3` on `--bg-deep`（浮层 / 面板） | 5.41:1 ✅  | 7.06:1 ✅  |
+| `--accent` on `--bg`                  | 4.95:1 ✅  | 12.60:1 ✅ |
+| `--accent-on` on `--accent`           | 5.41:1 ✅  | 12.18:1 ✅ |
+| `--accent-deep` on `--accent-wash`    | 6.13:1 ✅  | 6.48:1 ✅  |
+| `--line-strong` on `--bg`（控件边界）   | 3.18:1 ✅  | 3.59:1 ✅  |
+
+**边界规则（务必记住）**：`--ink-4` 只能用在 `--bg` 与 `--surface-1` 上。
+它在更深的表面上会掉出 AA：
+
+| 组合                  | normal | dark  |
+| --------------------- | ------ | ----- |
+| `--ink-4` on `--surface-2` | 4.27:1 ❌ | 4.36:1 ❌ |
+| `--ink-4` on `--bg-deep`   | 4.20:1 ❌ | 5.16:1 ✅ |
+
+所以：
+
+- 落在 `--surface-2` / `--bg-deep` 上的文字，用 `--ink-3` 而不是 `--ink-4`
+  （浮层底部标签、切换控件未选中项都按这条处理）。
+- 浅色主题的深色面板（索引栏）通过 `--rail-panel` 改做亮，而不是靠加深文字补救。
+- 强调色**底**（`--accent-wash`）上的文字用 `--accent-deep`，不要用 `--accent`：
+  后者在淡底上只有 4.50:1，正好卡在门槛上。
+
+> 上面的数字是实测值。改主题取值后在真实页面里复核渲染后的对比度，
+> 注意把 oklch 等色彩空间先归一化成 sRGB —— 浏览器会把计算值原样序列化成
+> `oklch(...)`，直接按 `rgb()` 解析会全部落空、静默跳过检查。
+
+### 9.7 新增一个主题
+
+1. 在 `src/config/theme.ts` 的 `themeRegistry` 登记 `{ id, name, mode, colorScheme, browserThemeColor }`。
+2. 在 `globals.css` 主题层追加一段 `html[data-theme="<id>"]`，覆盖需要的语义色与视觉令牌。
+3. 需要让用户看到它 → 改 `siteThemeConfig`（例如把 `normal` 指向新主题）。
+4. 用 9.6 的方式复核对比度，并在 PR 中给出实测数字。
+
+**页面代码一行都不用改。** 这正是把 Mode 与 Theme 分开的目的。
+
+### 9.8 按主题取图（唯一的例外）
+
+真实照片**不随主题换图**（深色模式最多允许极轻微的 brightness / contrast 调整）。
+唯一的例外是二维码这类功能性图形：`/qq-group-qrcode-accent.png` 自带深色底，
+放在暖白纸面上会像一块贴错位置的补丁。
+
+处理方式：`src/config/site.ts` 的 `contactQr` 同时提供 `src`（黑底黄码版）
+与 `srcLight`（浅底原色版），两个 `<img>` 都在服务端渲染，
+由 `html[data-theme]` 决定显示哪一张。隐藏的那张是 `display:none`，
+不进入无障碍树、也不会产生 hydration 分支。
+
+**除这类功能性图形外，不要为不同主题准备两套图片。**

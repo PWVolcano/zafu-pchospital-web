@@ -17,7 +17,9 @@ export type IconName =
   | "chevronDown"
   | "arrowDown"
   | "arrowUpRight"
-  | "fileText";
+  | "fileText"
+  | "sun"
+  | "moon";
 
 const shapes: Record<IconName, ReactNode> = {
   menu: (
@@ -63,6 +65,21 @@ const shapes: Record<IconName, ReactNode> = {
       <path d="M16 17H8" />
     </>
   ),
+  /* 正常模式 / 深色模式：主题切换入口使用。两者互为对照，线宽与端点规则与其他图标一致。 */
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </>
+  ),
+  moon: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,
 };
 
 export type IconProps = { name: IconName } & SVGProps<SVGSVGElement>;

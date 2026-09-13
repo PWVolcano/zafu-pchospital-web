@@ -123,8 +123,24 @@ export default function AboutPage() {
           </div>
 
           <figure className="contact-close__qr">
+            {/* 两张同码不同底色的图都在 DOM 里，由 CSS 按主题显示其中一张。
+                隐藏的那张是 display:none，不会进入无障碍树，也不会被重复朗读。 */}
             {/* eslint-disable-next-line @next/next/no-img-element -- 静态资源，尺寸固定，无需 next/image */}
-            <img src={contactQr.src} alt={contactQr.alt} loading="lazy" decoding="async" />
+            <img
+              className="qr-img qr-img--light"
+              src={contactQr.srcLight}
+              alt={contactQr.alt}
+              loading="lazy"
+              decoding="async"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element -- 同上，深色主题取图 */}
+            <img
+              className="qr-img qr-img--dark"
+              src={contactQr.src}
+              alt={contactQr.alt}
+              loading="lazy"
+              decoding="async"
+            />
             <figcaption>{contactQr.caption}</figcaption>
           </figure>
         </Reveal>

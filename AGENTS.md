@@ -44,16 +44,24 @@
 **禁止 Agent：**
 
 - ❌ 自己创造新的品牌色（全站只有一个强调色：信号黄 `--accent`）
+- ❌ 在组件里写死主题色值（`color: #2457ff`、`background: #ffd400` 这类），必须走语义令牌
+- ❌ 在组件里判断当前显示模式再挑颜色（`theme === "dark" ? "#FFD400" : "#2457FF"`）
 - ❌ 自己重新设计 Header（桌面索引栏 / 移动端顶栏与浮层的结构已固定）
 - ❌ 自己重新设计 Footer
 - ❌ 自己创建第二套 Button / Container / Card / Section
-- ❌ 使用 `docs/design-system.md` 之外的圆角数值（只有 `2px` / `4px` / `999px`）
+- ❌ 使用 `docs/design-system.md` 之外的圆角数值（只有 `2px` / `4px` / `999px`；
+     主题层自带的 `--r-frame` 属于主题取值，组件不要自己写新的圆角）
 - ❌ 添加 `box-shadow`（设计基准不使用任何阴影）
 - ❌ 使用标准断点之外的新断点（只用 `760px` 与 `1100px`，即 `md:` / `lg:`）
 - ❌ 为「高级感」添加粒子、3D、光晕、新的鼠标跟随特效
 
 **必须做到：**
 
+- ✅ 颜色与视觉取值一律使用语义令牌（`var(--bg)` / `var(--surface-1)` / `var(--ink)` /
+     `var(--line)` / `var(--accent)` 等）。当前生效的主题由 `<html data-theme>` 决定，
+     组件不需要知道是哪个主题 —— 详见 `docs/design-system.md` 第 9 节
+- ✅ 需要新增主题：改 `src/config/theme.ts` 的注册表 + 在 `globals.css` 主题层加一段
+     `html[data-theme="<id>"]`；**不要**为不同模式写两套页面或两套组件
 - ✅ 文案与列表数据放在 `src/config/`，不要硬编码在组件里
 - ✅ 页面区块用 `components/ui/Section.tsx` 包裹，不要自己写 `padding-block`
 - ✅ 内容放在 `components/layout/Container.tsx` 内

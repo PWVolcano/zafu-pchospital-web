@@ -46,20 +46,23 @@
 │   │   └── icon.svg           # 站点图标
 │   │
 │   ├── components/
-│   │   ├── layout/            # 全站级骨架组件
+│   │   ├── layout/            # 全站级骨架组件（Header / Footer / Container /
+│   │   │                      #   PageHead / SiteEffects / ThemeSwitcher）
 │   │   ├── ui/                # 通用 UI 原语
 │   │   ├── home/              # 仅首页使用的区块
 │   │   └── docs/              # 文档相关区块（首页与 /docs 共用）
 │   │
 │   ├── config/                # 站点配置与页面文案数据
-│   │   ├── site.ts            # 站点信息、外链、联系方式、文档仓库
+│   │   ├── site.ts            # 站点信息、外链、联系方式、文档仓库、二维码
 │   │   ├── navigation.ts      # 导航菜单（新增页面只改这里）
+│   │   ├── theme.ts           # 主题注册表与「模式 → 主题」映射
 │   │   ├── home.ts            # 首页文案与服务/流程数据
 │   │   ├── about.ts           # /about 文案
 │   │   └── join.ts            # /join 文案
 │   │
 │   ├── lib/                   # 无 UI 的纯逻辑
 │   │   ├── utils.ts           # cn / revealIndex / pad2
+│   │   ├── theme.ts           # 主题持久化、DOM 应用、订阅、引导脚本
 │   │   └── docs.ts            # 读取文档清单、目录摊平、外链生成
 │   │
 │   └── data/
@@ -169,15 +172,50 @@ src/lib/*.ts    ──┘         （拼装）              （渲染）
 
 `src/app/globals.css` 是唯一的样式入口，分四段：
 
-| 段                  | 内容                           | 谁可以改     |
-| ------------------- | ------------------------------ | ------------ |
-| `:root`             | 设计令牌（与设计基准逐值一致） | 需要设计确认 |
-| `@theme inline`     | 令牌到 Tailwind 命名空间的映射 | 需要设计确认 |
-| `@layer base`       | 重置与全局元素样式             | 谨慎         |
-| `@layer components` | 稳定可复用的视觉模式           | 常规开发     |
+| 段                  | 内容                                          | 谁可以改     |
+| ------------------- | --------------------------------------------- | ------------ |
+| `:root`             | 主题无关令牌 + 默认主题的语义色（无脚本兜底） | 需要设计确认 |
+| 主题层              | `html[data-theme="<id>"]`，一个主题一段        | 需要设计确认 |
+| `@theme inline`     | 令牌到 Tailwind 命名空间的映射                | 需要设计确认 |
+| `@layer base`       | 重置与全局元素样式                            | 谨慎         |
+| `@layer components` | 稳定可复用的视觉模式                          | 常规开发     |
 
 组件里优先使用 **Tailwind 工具类**；复杂且稳定的模式使用**组件类**。
 不要写行内 `style`（`--i` 这类 CSS 变量除外）。
+
+### 5.1 主题系统（Theme）
+
+页面结构不参与主题，主题只作用在语义令牌这一层。完整视觉约定见
+`docs/design-system.md` 第 9 节，这里只记录「代码放在哪、状态存在哪」。
+
+| 关注点         | 位置                                                                  |
+| -------------- | --------------------------------------------------------------------- |
+| Theme Registry | `src/config/theme.ts` → `themeRegistry`（主题身份与元数据）            |
+| Theme Config   | `src/config/theme.ts` → `siteThemeConfig`（模式 → 主题的映射）         |
+| Theme Resolver | `src/config/theme.ts` → `resolveTheme(mode)`                          |
+| 主题取值       | `src/app/globals.css` 主题层，选择器 `html[data-theme="<id>"]`        |
+| 持久化         | `localStorage`，键 `zafu-pchospital:theme-mode`（`src/lib/theme.ts`）  |
+| 运行时         | `src/lib/theme.ts`：读写 DOM、订阅、生成引导脚本                       |
+| 用户入口       | `src/components/layout/ThemeSwitcher.tsx`，挂在 Header 的索引栏与浮层 |
+| HTML 表达      | `<html data-mode="normal\|dark" data-theme="<ThemeId>">`               |
+
+**首次访问的默认值**：本地无保存偏好时跟随系统 `prefers-color-scheme`，
+否则落到 `DEFAULT_THEME_MODE`。一旦用户点过切换，就以本地保存的选择为准。
+
+**防闪烁**：`app/layout.tsx` 在 `<body>` 起始处注入一段同步内联脚本，
+在首次绘制前把 `data-mode` / `data-theme` / `theme-color` 写好。
+脚本内容由 `buildThemeBootstrapScript()` 从主题注册表生成，
+**不要在 `layout.tsx` 里硬编码主题名或色值**。
+
+**为什么不用 CSS 媒体查询兜底无脚本场景**：那会把深色主题的色值写两遍
+（媒体查询一份、属性选择器一份），造成两个事实来源。当前取舍是：
+无脚本时回落到默认主题，并在文档里写明。
+
+**未来管理员后台**只负责改变 `siteThemeConfig` 里
+「normal → 哪个 ThemeId / dark → 哪个 ThemeId」的映射，
+数据来源由静态配置换成数据库读取即可。页面与组件一行都不用改。
+
+> 本阶段**不实现**后台主题管理：无数据库表、无外观设置页、无主题 CRUD、无用户自定义主题。
 
 ---
 

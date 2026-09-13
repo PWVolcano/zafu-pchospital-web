@@ -68,9 +68,19 @@ export const contactChannels: readonly LinkItem[] = [
   },
 ];
 
-/** 求助渠道二维码（与 contactChannels 的 QQ 群对应） */
+/**
+ * 求助渠道二维码（与 contactChannels 的 QQ 群对应）
+ *
+ * 同一个码准备了两种底色版本，由主题决定显示哪一张：
+ * - `src`      黑底黄码版，图片自带与深色主题同色的深底
+ * - `srcLight` 原始浅底版，用于暖白纸面的正常模式
+ *
+ * 两个 `<img>` 都在服务端渲染，靠 CSS 按 `html[data-theme]` 切换 ——
+ * 组件不需要判断当前是什么主题，也不产生 hydration 分支。
+ */
 export const contactQr = {
   src: "/qq-group-qrcode-accent.png",
+  srcLight: "/qq-group-qrcode.jpg",
   alt: "浙江农林大学电脑医院 QQ 群二维码，群号 532502904",
   caption: "扫码加入 QQ 群",
   hint: "群号 532502904",

@@ -28,31 +28,68 @@
 }
 
 /* ============================================================== 设计令牌 */
-/* 与设计基准 Demo（zafu-pchospital-site/assets/css/style.css）保持逐值一致 */
+/* 结构说明（改动前先读这段）：
+     1. `:root`           主题无关令牌（字体/字号/间距/半径/动效/栅格）
+                          + **默认主题**的语义色令牌（无脚本时的兜底）
+     2. 主题层             `html[data-theme="<ThemeId>"]`，一个主题一段
+                          主题 ID 与映射关系见 src/config/theme.ts
+     3. `@theme inline`   把令牌映射到 Tailwind 命名空间
+
+   规则：组件只使用语义令牌（--bg / --surface-* / --ink-* / --line* / --accent*），
+        禁止写死具体主题色值，也不要在组件里判断当前是什么模式。
+        颜色该长什么样，由 `<html data-theme>` 上挂着的主题决定。 */
+
 :root {
-  /* 色板：中性色统一带 95° 微暖色相，与信号黄强调色同源 */
-  --bg: oklch(14.5% 0.006 95);
-  --bg-deep: oklch(11.5% 0.006 95);
-  --surface-1: oklch(18% 0.006 95);
-  --surface-2: oklch(22% 0.007 95);
-  --surface-3: oklch(26% 0.008 95);
+  /* ---------------------------------------- 语义色令牌 · 默认主题（normal）
+     这里同时承担两个角色：
+       (a) 无脚本访客看到的配色 —— 与 config/theme.ts 的 DEFAULT_THEME_MODE 一致；
+       (b) 深色主题要覆盖的那一层基线。
+     当前默认主题是 swiss-cobalt：暖白纸面 + 炭黑 + 钴蓝，
+     取自实验分支 style-about-editorial-test 已验证的视觉方向。
+     对比度实测（对 --bg #f5f5f2）：ink 16.4 / ink-2 10.0 / ink-3 5.9 / ink-4 4.5 /
+     accent 5.0 / line-strong 3.2，四档文字全部满足 WCAG AA。 */
+  --bg: #f5f5f2;
+  --bg-deep: #edece7;
+  --surface-1: #ffffff;
+  --surface-2: #efeee9;
+  --surface-3: #e5e4de;
 
-  --line: oklch(31% 0.008 95);
-  --line-soft: oklch(23% 0.007 95);
-  --line-strong: oklch(52% 0.009 95); /* 仅用于交互控件边界，保证 3:1 */
+  --line: #d8d8d4;
+  --line-soft: #e6e6e1;
+  --line-strong: #8a8a85; /* 仅用于交互控件边界，保证 3:1 */
 
-  /* 文字层级：四档都要满足 WCAG AA（最暗一档在 bg 上 5.0:1） */
-  --ink: oklch(96% 0.008 95);
-  --ink-2: oklch(82% 0.009 95);
-  --ink-3: oklch(68% 0.009 95);
-  --ink-4: oklch(60% 0.009 95);
+  /* 文字层级：四档都满足 WCAG AA。
+     注：三、四两档比实验分支的原值更深 —— 原值 #737373 / #8f8f8b 是按纯白算的，
+     落在 #f5f5f2 纸面上只有 4.34 / 2.97，达不到 AA。 */
+  --ink: #171717;
+  --ink-2: #3d3d3b;
+  --ink-3: #5f5f5d;
+  --ink-4: #70706e;
 
-  /* 唯一强调色：安全标识黄 */
-  --accent: oklch(85% 0.175 99);
-  --accent-deep: oklch(70% 0.155 97);
-  --accent-on: oklch(17% 0.03 99);
-  --accent-wash: oklch(85% 0.175 99 / 0.1);
-  --accent-line: oklch(85% 0.175 99 / 0.34);
+  /* 唯一强调色：钴蓝。蓝色是标点，不是背景。 */
+  --accent: #2457ff;
+  --accent-deep: #1c44d6;
+  --accent-on: #ffffff;
+  --accent-wash: rgb(36 87 255 / 0.07);
+  --accent-line: rgb(36 87 255 / 0.32);
+
+  /* ------------------------------------ 主题可控的视觉令牌（非颜色部分）
+     主题不只调颜色：圆角、大字号、装饰强度同样属于「主题」。
+     集中在这里，未来新增主题（Paper Green / Graphite …）可以各自调整，
+     而不需要改任何组件的结构。 */
+  --r-frame: 0; /* 图集/照片框圆角：editorial 用直角 */
+  --t-page-title: clamp(3rem, 8vw, 6.25rem); /* 内页页头主标题：海报级 */
+  --page-title-leading: 1.04;
+  --page-title-tracking: -0.025em;
+  --deco-grid-line: var(--line); /* 背景走线栅格的线色 */
+  --deco-scan: rgb(36 87 255 / 0.05); /* 扫描质感带 */
+  --deco-watermark: rgb(36 87 255 / 0.17); /* 首页水印字形描边 */
+  --deco-reticle-blend: multiply; /* 指针准星的混合模式：浅底用 multiply 才可见 */
+  /* 左侧索引栏的面板底色（渐变起点）。深色主题把它做暗，浅色主题必须反过来
+     做亮：--ink-4 在 --bg-deep 上只有 4.2:1，栏内导航文字会掉出 AA。 */
+  --rail-panel: var(--surface-1);
+
+  color-scheme: light;
 
   /* 字体栈：--font-sans / --font-latin 同时是 Tailwind 的 font-* 令牌 */
   --font-latin: "Archivo", "Helvetica Neue", Arial, sans-serif;
@@ -102,8 +139,53 @@
   --gutter: clamp(1.25rem, 4.2vw, 4.5rem);
   --maxw: 1480px;
   --measure: 62ch;
+}
+
+/* ================================================================ 主题层 */
+/* 一个主题一段，选择器与 config/theme.ts 里的 ThemeId 一一对应。
+   新增主题 = 在下面追加一段 `html[data-theme="<id>"]` + 在注册表登记，
+   不需要改动任何组件。 */
+
+/* ------------------------------------------------- 深色 / black-yellow
+   站点原有视觉：深色石墨 + 单一信号黄，中性色统一带 95° 微暖色相，
+   与信号黄强调色同源。取值与设计基准 Demo 逐值一致，未作改动。
+   对比度实测（对 --bg）：ink 17.6 / ink-2 11.4 / ink-3 6.9 / ink-4 5.0 /
+   accent 12.6 / line-strong 3.6。 */
+html[data-theme="black-yellow"] {
+  --bg: oklch(14.5% 0.006 95);
+  --bg-deep: oklch(11.5% 0.006 95);
+  --surface-1: oklch(18% 0.006 95);
+  --surface-2: oklch(22% 0.007 95);
+  --surface-3: oklch(26% 0.008 95);
+
+  --line: oklch(31% 0.008 95);
+  --line-soft: oklch(23% 0.007 95);
+  --line-strong: oklch(52% 0.009 95);
+
+  --ink: oklch(96% 0.008 95);
+  --ink-2: oklch(82% 0.009 95);
+  --ink-3: oklch(68% 0.009 95);
+  --ink-4: oklch(60% 0.009 95);
+
+  --accent: oklch(85% 0.175 99);
+  --accent-deep: oklch(70% 0.155 97);
+  --accent-on: oklch(17% 0.03 99);
+  --accent-wash: oklch(85% 0.175 99 / 0.1);
+  --accent-line: oklch(85% 0.175 99 / 0.34);
 
   color-scheme: dark;
+
+  /* 视觉令牌：深色主题保留原设计中偏「技术」的一面 —— 4px 面板圆角、
+     常规内页标题尺度、更明显的走线栅格与扫描线、screen 混合的准星。 */
+  --r-frame: var(--r-mid);
+  --t-page-title: var(--t-2xl);
+  --page-title-leading: 1.14;
+  --page-title-tracking: -0.015em;
+  --deco-grid-line: var(--line-soft);
+  --deco-scan: oklch(85% 0.175 99 / 0.028);
+  --deco-watermark: oklch(85% 0.175 99 / 0.16);
+  --deco-reticle-blend: screen;
+  --rail-panel: var(--bg-deep); /* 深色主题维持原设计：面板比页面更深 */
 }
 
 /* ==================================================== Tailwind 令牌映射 */
@@ -226,7 +308,8 @@
     border-radius: var(--r-base);
   }
 
-  /* 背景走线栅格：极低对比，仅作质感 */
+  /* 背景走线栅格：极低对比，仅作质感。线色走 --deco-grid-line —— 浅底上
+     用 --line-soft 会淡到看不见，因此由主题分别取值。 */
   body::before {
     content: "";
     position: fixed;
@@ -234,8 +317,8 @@
     z-index: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(to right, var(--line-soft) 0 1px, transparent 1px),
-      linear-gradient(to bottom, var(--line-soft) 0 1px, transparent 1px);
+      linear-gradient(to right, var(--deco-grid-line) 0 1px, transparent 1px),
+      linear-gradient(to bottom, var(--deco-grid-line) 0 1px, transparent 1px);
     background-size:
       25% 25%,
       100% 220px;
@@ -243,7 +326,8 @@
     mask-image: radial-gradient(ellipse 120% 90% at 50% 0%, #000 25%, transparent 78%);
   }
 
-  /* 扫描质感：一行极淡的横向明暗带 */
+  /* 扫描质感：一行极淡的横向明暗带。颜色取自 --deco-scan（强调色的极低透明度），
+     深浅两套主题分别取值，不在这里硬编码某个主题的色。 */
   body::after {
     content: "";
     position: fixed;
@@ -253,7 +337,7 @@
     background: linear-gradient(
       180deg,
       transparent 0%,
-      oklch(85% 0.175 99 / 0.028) 50%,
+      var(--deco-scan) 50%,
       transparent 100%
     );
     background-size: 100% 340px;
@@ -313,6 +397,13 @@
   .page-head {
     padding-block: clamp(7rem, 16vh, 10rem) var(--s-7);
     border-bottom: 1px solid var(--line-soft);
+  }
+
+  /* 内页页头主标题：字号、行高与字距由主题决定（editorial 方向用海报级字号） */
+  .page-head .sec-title {
+    font-size: var(--t-page-title);
+    line-height: var(--page-title-leading);
+    letter-spacing: var(--page-title-tracking);
   }
 
   /* ------------------------------------------------------- 通用文字件 */
@@ -474,7 +565,7 @@
     justify-content: space-between;
     padding: var(--s-6) 0;
     border-right: 1px solid var(--line-soft);
-    background: linear-gradient(180deg, var(--bg-deep), var(--bg));
+    background: linear-gradient(180deg, var(--rail-panel), var(--bg));
   }
 
   .rail__brand {
@@ -564,6 +655,13 @@
   }
   .rail__link[aria-current="page"]::before {
     transform: translateY(-50%) scaleY(1);
+  }
+
+  .rail__foot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s-5);
   }
 
   .rail__meta {
@@ -717,6 +815,89 @@
     height: 16px;
   }
 
+  /* 浮层底部的显示模式切换行 */
+  .menu__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line-soft);
+  }
+  .menu__foot-label {
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    /* 用 --ink-3 而非 --ink-4：浮层底色是 --bg-deep，比页面更深，
+       --ink-4 在其上只有 4.2:1（浅色主题），达不到 AA。 */
+    color: var(--ink-3);
+  }
+
+  /* -------------------------------------------------------- 显示模式切换
+     两个入口共用一套样式：桌面索引栏底部（--rail，纵向堆叠）与
+     移动端索引浮层（--inline，横向一行）。
+     当前项用强调色文字 + 描边 + 淡底标记，不填满强调色，保持克制。
+     未选中项用 --ink-3：它可能落在 --bg-deep（浮层）或索引栏面板上，
+     这两处的对比度都要留足，--ink-4 在浅色主题下不达标。 */
+  .theme-switch {
+    display: flex;
+    gap: var(--s-1);
+  }
+
+  .theme-switch__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-2);
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-base);
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    white-space: nowrap;
+    transition:
+      color var(--d-fast) var(--ease-quart),
+      border-color var(--d-fast) var(--ease-quart),
+      background var(--d-fast) var(--ease-quart);
+  }
+  .theme-switch__btn svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+  .theme-switch__btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .theme-switch__btn[aria-pressed="true"] {
+    /* 文字用 --accent-deep 而非 --accent：淡底会把强调色自身的对比度拉低，
+       实测 --accent 在 --accent-wash 上只有 4.50:1，正好卡在 AA 门槛上；
+       改用强调色的深色变体（设计系统里「标记文字」的令牌）后为 6.1:1。 */
+    color: var(--accent-deep);
+    border-color: var(--accent-line);
+    background: var(--accent-wash);
+    font-weight: 800;
+  }
+
+  /* 桌面索引栏：图标在上、字样在下，宽度收进 88px 栏内 */
+  .theme-switch--rail {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s-2);
+  }
+  .theme-switch--rail .theme-switch__btn {
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--s-2) var(--s-1);
+    letter-spacing: 0.06em;
+  }
+
   /* -------------------------------------------------------------- HERO */
   .hero {
     position: relative;
@@ -741,7 +922,7 @@
     letter-spacing: -0.045em;
     white-space: nowrap;
     color: transparent;
-    -webkit-text-stroke: 1px oklch(85% 0.175 99 / 0.16);
+    -webkit-text-stroke: 1px var(--deco-watermark);
     pointer-events: none;
     user-select: none;
   }
@@ -1202,7 +1383,7 @@
   }
   .gallery--editorial .gallery__stage {
     border: 1px solid var(--line);
-    border-radius: var(--r-mid);
+    border-radius: var(--r-frame);
     overflow: hidden;
   }
   /* 信息栏：左侧纪年 + 活动名，右侧序号与控件 */
@@ -1889,6 +2070,19 @@
     color: var(--ink-4);
   }
 
+  /* 二维码按主题取图。两张图都在 DOM 里，只显示当前主题需要的那张；
+     隐藏的那张是 display:none，不会进入无障碍树。
+     正常模式用浅底原色版，深色模式用与页面同色的黑底黄码版。 */
+  html .qr-img--dark {
+    display: none;
+  }
+  html[data-theme="black-yellow"] .qr-img--light {
+    display: none;
+  }
+  html[data-theme="black-yellow"] .qr-img--dark {
+    display: block;
+  }
+
   /* 待补充标记 */
   .todo {
     display: inline-flex;
@@ -1947,7 +2141,9 @@
     left: 0;
     z-index: 70;
     pointer-events: none;
-    mix-blend-mode: screen;
+    /* 混合模式由主题决定：screen 在深色底上成立，在暖白底上会让准星彻底消失，
+       浅色主题改用 multiply。 */
+    mix-blend-mode: var(--deco-reticle-blend);
     opacity: 0;
     transition: opacity var(--d-mid) var(--ease-quart);
   }
