@@ -7,7 +7,7 @@ import { SectionHead } from "@/components/ui/SectionHead";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { docsTeaser } from "@/config/home";
 import { siteConfig } from "@/config/site";
-import { docFileUrl, docTree, flattenDocTree } from "@/lib/docs";
+import { docPageUrl, docTree, flattenDocTree } from "@/lib/docs";
 
 /**
  * DocsSection —— 首页「文档」区块
@@ -63,7 +63,7 @@ export function DocsSection() {
           <span>src/ · {siteConfig.docRepo.name}</span>
           <span>{siteConfig.docRepo.author}</span>
         </div>
-        <DocList items={items} resolveHref={docFileUrl} />
+        <DocList items={items} resolveHref={docPageUrl} />
       </Reveal>
     </Section>
   );

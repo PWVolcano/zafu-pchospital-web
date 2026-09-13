@@ -144,7 +144,7 @@
 ### 3.7 `src/data/` —— 结构化数据
 
 - `doc-manifest.json`：文档仓库清单，**由文档仓库的构建脚本生成，不要手改**。
-- 更新方式：用文档仓库的 `tools/build_doc_data.py` 重新生成后覆盖。
+- 更新方式：运行 `pnpm docs:build`，从同一份文档源码生成 mdBook 正文并覆盖清单。
 
 ### 3.8 `public/` —— 静态资源
 

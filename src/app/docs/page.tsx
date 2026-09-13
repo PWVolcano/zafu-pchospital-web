@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/Section";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { SectionTitle } from "@/components/ui/SectionTitle";
 import { siteConfig, type LinkItem } from "@/config/site";
-import { docFileUrl, docTree, flattenDocTree } from "@/lib/docs";
+import { docPageUrl, docTree, flattenDocTree } from "@/lib/docs";
 
 export const metadata: Metadata = {
   title: "技术文档",
@@ -20,12 +20,12 @@ export const metadata: Metadata = {
 /**
  * /docs 技术文档入口
  *
- * 技术文档已有独立的 mdBook 仓库，本阶段不重新实现文档系统，
+ * 技术文档由独立仓库维护，并在官网构建时生成到同域 /handbook/，
  * 本页只做入口与目录展示：
- * - 入口：源文件仓库、正式文档站（预留 NEXT_PUBLIC_DOCS_URL）、Issue 入口
+ * - 入口：同域文档站、源文件仓库、Issue 入口
  * - 目录：读取 src/data/doc-manifest.json，展示条目与就绪状态
  *
- * 站点不托管文档正文，条目统一跳转到 ZAFU-PCHospital-Doc 的源文件。
+ * 已就绪条目在当前标签页进入同域 mdBook，源文件仓库仍作为独立外链保留。
  */
 
 const docEntranceSections = {
@@ -40,19 +40,12 @@ const docChannels: readonly LinkItem[] = [
     description: "mdBook 源文件仓库，全部文档的正文与图片都来自这里",
     href: siteConfig.docRepo.url,
   },
-  siteConfig.docsSiteUrl
-    ? {
-        kind: "文档站",
-        title: "技术文档站",
-        description: "在线阅读，按目录翻阅全部条目",
-        href: siteConfig.docsSiteUrl,
-      }
-    : {
-        kind: "文档站",
-        title: "正式文档域名",
-        description: "尚未绑定正式域名，部署后通过 NEXT_PUBLIC_DOCS_URL 配置即可在此显示",
-        pending: true,
-      },
+  {
+    kind: "文档站",
+    title: "技术文档站",
+    description: "在官网域名内阅读 mdBook 正文、搜索和章节导航",
+    href: "/handbook/",
+  },
   {
     kind: "贡献",
     title: "提交勘误与补充",
@@ -71,7 +64,7 @@ export default function DocsPage() {
         index="04"
         label="Docs"
         title="技术文档"
-        lead="电脑医院把日常维修与排障经验整理成公开文档。这里提供文档仓库的入口与目录概览，正文请前往文档仓库查阅。"
+        lead="电脑医院把日常维修与排障经验整理成公开文档。这里提供目录、完成状态与贡献入口，已就绪条目可直接在官网内阅读。"
       />
 
       {/* ---------------------------------------------------- 文档入口 */}
@@ -103,8 +96,8 @@ export default function DocsPage() {
         <div className="docs__grid">
           <div>
             <Reveal as="p" className="lead" index={2}>
-              文档仓库按「软件」与「电医维修手册」两个大类组织条目。点击条目会跳转到仓库中的源文件，
-              可以在线阅读，也可以通过 Issue 提交勘误。
+              文档仓库按目录组织条目。点击已就绪条目会进入站内阅读页面；如需查看 Markdown
+              源文件或提交勘误，可使用上方的仓库与 Issue 入口。
             </Reveal>
           </div>
 
@@ -121,7 +114,7 @@ export default function DocsPage() {
             <span>src/ · {siteConfig.docRepo.name}</span>
             <span>{siteConfig.docRepo.author}</span>
           </div>
-          <DocList items={items} resolveHref={docFileUrl} />
+          <DocList items={items} resolveHref={docPageUrl} />
         </Reveal>
       </Section>
     </>

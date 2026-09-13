@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:full": "pnpm docs:build && pnpm build",
+    "docs:build": "node tools/build-docs.mjs",
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier --write .",
