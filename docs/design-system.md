@@ -238,6 +238,8 @@
 | `Icon`         | `ui/Icon.tsx`         | 内联 SVG                 | 24 格 / stroke 2 / round 端点        |
 | `ServiceList`  | `ui/ServiceList.tsx`  | `.svc-list` / `.svc`     | 服务条目列表                         |
 | `ChannelList`  | `ui/ChannelList.tsx`  | `.channels` / `.channel` | 渠道与外链入口                       |
+| `GalleryCarousel` | `ui/GalleryCarousel.tsx` | `.gallery` / `.gallery__*` | 现场图集走马灯（自动播放 + 暂停）  |
+| `QrCard`       | 内联（`/about` 联系方式区） | `.qr` / `.qr__*`        | 二维码展示卡（图片自带页面同色底，卡片不设承板） |
 
 ### 4.3 业务区块组件
 

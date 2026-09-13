@@ -37,5 +37,9 @@ yarn-error.log*
 # 本地验证用的临时 Chrome 配置目录（tools/inspect.mjs）
 .chrome-profile/
 
+# 图集原图备份（tools/compress-gallery.mjs 自动生成，仅供重新导出用）
+public/gallery/_originals/
+public/_originals/
+
 # 本地 Agent 工作区（记忆日志等，不随代码库共享）
 .workbuddy/

@@ -8,10 +8,6 @@
 export type Service = {
   name: string;
   description: string;
-  /** 文档仓库中是否已有对应文档：true 显示「已上线」，false 显示「撰写中」 */
-  documented: boolean;
-  /** documented 为 true 时，右侧标签的具体文案 */
-  readyLabel?: string;
 };
 
 export type Principle = { title: string; description: string };
@@ -28,7 +24,7 @@ export const heroContent = {
 } as const;
 
 export const aboutContent = {
-  title: "一间由学生值守的电脑诊室",
+  title: "关于电脑医院",
   lead: "电脑医院是浙江农林大学的志愿性学生技术社团。我们做的事很具体：把出问题的电脑修好，把说不清的网络问题查清，再把攒下来的经验整理成任何人都能查的文档。",
   muted:
     "第一次来不需要准备什么。把设备带上，把问题的现象尽量说清楚就够了。我们会先尝试复现问题，再决定怎么动手。",
@@ -51,7 +47,7 @@ export const principles: readonly Principle[] = [
   {
     title: "志愿性质，不收费",
     description:
-      "社团由学生志愿运营。遇到超出我们能力范围的操作，会直接说明并放弃，不会硬着头皮往下拆。",
+      "社团由学生志愿运营，不收取任何费用。超出能力范围的操作会提前说明，并建议寻求专业维修服务。",
   },
   {
     title: "先确认，再动手",
@@ -67,38 +63,28 @@ export const principles: readonly Principle[] = [
 
 export const services: readonly Service[] = [
   {
-    name: "校园网认证与网络排障",
+    name: "电脑散热模组深度清理",
     description:
-      "认证失败、认证后无法正常上网、路由器接入、多设备下线与 MAC Auth 配置。相关指引已整理成文，可直接查阅。",
-    documented: true,
-    readyLabel: "文档已上线",
+      "拆机除尘、更换硅脂、风扇与散热模组复装。操作全程遵循《电医维修守则》，涉及保修信息的操作会先与你确认。",
   },
   {
-    name: "硬件维修与保养",
+    name: "硬件故障排查",
     description:
-      "拆机清灰、更换硅脂、风扇与排线复装、无线网卡与内存硬盘的安装检查。操作全程遵循《电医维修守则》。",
-    documented: true,
-    readyLabel: "手册已上线",
+      "不开机、异常断电、屏幕与排线问题、无线网卡与内存硬盘的检测替换，按最小系统逐项验证。",
   },
   {
-    name: "系统与软件安装",
-    description: "系统重装、常用软件部署、开发与学习环境的依赖配置。",
-    documented: false,
+    name: "系统与软件问题处理",
+    description:
+      "系统安装与配置、驱动与软件故障排查、蓝屏及磁盘异常等常见问题处理。",
   },
   {
-    name: "蓝屏与驱动排查",
-    description: "蓝屏现象定位、驱动冲突与版本回退、外设兼容性问题排查。",
-    documented: false,
-  },
-  {
-    name: "磁盘与数据问题",
-    description: "分区与扩容、硬盘健康检测、异常掉盘判断与数据先行的处理顺序。",
-    documented: false,
+    name: "网络问题排查",
+    description:
+      "校园网认证失败、认证后无法正常上网、路由器接入、多设备下线与 MAC Auth 配置。",
   },
   {
     name: "计算机基础答疑",
     description: "从最基础的使用与维护问题讲起，包括日常保养、备份习惯和安全安装软件。",
-    documented: false,
   },
 ];
 

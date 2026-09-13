@@ -1035,6 +1035,236 @@
     transform: scaleX(1);
   }
 
+  /* -------------------------------------------------------------- 图集 */
+  /* 现场图集走马灯。与 .ticker 的装饰性跑马灯不同，这里承载真实内容：
+     画面用 3:2 统一比例 + cover 居中裁切，混排横竖图时不会拉出高低差。 */
+  .gallery {
+    border: 1px solid var(--line);
+    border-radius: var(--r-mid);
+    background: var(--surface-1);
+    overflow: hidden;
+  }
+  .gallery__stage {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: var(--bg-deep);
+  }
+  .gallery__slide {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--d-slow) var(--ease-quart),
+      visibility 0s linear var(--d-slow);
+  }
+  .gallery__slide.is-current {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--d-slow) var(--ease-quart),
+      visibility 0s;
+  }
+  .gallery__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 图片加载失败时不塌陷：底图先给一层面板色 */
+    background: var(--surface-2);
+  }
+  .gallery__cap {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: grid;
+    gap: var(--s-2);
+    padding: clamp(1rem, 2.6vw, 1.6rem);
+    /* 图注压在照片上，用不透明底色保证文字对比度，不靠阴影 */
+    background: var(--bg-deep);
+    border-top: 1px solid var(--line);
+  }
+  .gallery__cap-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+  }
+  .gallery__cap-desc {
+    max-width: 62ch;
+    font-size: 0.9375rem;
+    line-height: 1.82;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+
+  .gallery__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) clamp(1rem, 2.6vw, 1.6rem);
+    border-top: 1px solid var(--line);
+  }
+  .gallery__nav {
+    display: flex;
+    gap: var(--s-2);
+  }
+  .gallery__btn {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-base);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      color var(--d-fast) var(--ease-quart),
+      border-color var(--d-fast) var(--ease-quart),
+      background var(--d-mid) var(--ease-quart);
+  }
+  .gallery__btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .gallery__btn:hover {
+    color: var(--accent-on);
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .gallery__dots {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .gallery__dot {
+    display: block;
+    width: 1.75rem;
+    height: 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--line-strong);
+    cursor: pointer;
+    transition: background var(--d-mid) var(--ease-quart);
+  }
+  .gallery__dot:hover {
+    background: var(--ink-3);
+  }
+  .gallery__dot.is-current {
+    background: var(--accent);
+  }
+
+  .gallery__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+  }
+  .gallery__idx {
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--ink-4);
+  }
+  .gallery__toggle {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 700;
+    font-stretch: 116%;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    cursor: pointer;
+    transition: color var(--d-fast) var(--ease-quart);
+  }
+  .gallery__toggle:hover {
+    color: var(--accent);
+  }
+
+  /* ------------------------------------------------- 图集（编辑式变体）
+     去「企业轮播组件」观感：去掉外框与压图图注，整幅大图 + 下方一行
+     编辑式信息栏（纪年 · 活动名 · 序号）。箭头收成极简文字态。 */
+  .gallery--editorial {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .gallery--editorial .gallery__stage {
+    border: 1px solid var(--line);
+    border-radius: var(--r-mid);
+    overflow: hidden;
+  }
+  /* 信息栏：左侧纪年 + 活动名，右侧序号与控件 */
+  .gallery__lede {
+    display: grid;
+    gap: var(--s-2);
+    padding-top: var(--s-4);
+  }
+  .gallery__lede-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-2) var(--s-3);
+    margin: 0;
+  }
+  .gallery__lede-year {
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 800;
+    font-stretch: 116%;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .gallery__lede-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+  }
+  .gallery__lede-desc {
+    max-width: 62ch;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.82;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+  .gallery--editorial .gallery__bar {
+    gap: var(--s-5);
+    padding: var(--s-4) 0 0;
+    border-top: 1px solid var(--line);
+    margin-top: var(--s-4);
+  }
+  /* 编辑式变体的箭头：无边框、无底色，只保留字形本身 */
+  .gallery--editorial .gallery__btn {
+    width: auto;
+    height: auto;
+    padding: 0.35rem 0.25rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink-4);
+  }
+  .gallery--editorial .gallery__btn:hover {
+    color: var(--accent);
+    border: 0;
+    background: transparent;
+  }
+  .gallery--editorial .gallery__btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
   /* ------------------------------------------------------------ 跑马灯 */
   .ticker {
     position: relative;
@@ -1088,6 +1318,10 @@
     gap: clamp(2.5rem, 6vw, 6rem);
     align-items: start;
   }
+  /* 叙述与原则的外层分栏容器：小屏堆叠，≥760px 变两列（见响应式段） */
+  .about__lead {
+    display: block;
+  }
   .about__grid .lead {
     margin: 0 0 var(--s-5);
   }
@@ -1137,6 +1371,88 @@
     color: var(--ink-3);
   }
 
+  /* ------------------------------------------------------------ 社团档案
+     资料卡式键值对排版，刻意与「服务原则」的论述式列表拉开差异：
+     原则用编号 + 粗体标题 + 段落；档案用窄字段列 + 单行值，强对齐、弱装饰。 */
+  .archive {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .archive__note {
+    max-width: 62ch;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.85;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+  .archive__list {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+  .archive__row {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 8rem) minmax(0, 1fr);
+    gap: var(--s-2) var(--s-5);
+    padding: var(--s-4) 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .archive__key {
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 800;
+    font-stretch: 116%;
+    letter-spacing: 0.16em;
+    color: var(--ink-4);
+    padding-top: 0.25em;
+  }
+  .archive__val {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  /* ---------------------------------------------------- 服务范围（编辑式）
+     /about 用大编号 + 大标题 + 细分割线的非对称排版，
+     与首页紧凑版服务列表共用组件但呈现不同。 */
+  .svc-list--editorial {
+    border-top: 1px solid var(--line);
+  }
+  .svc-list--editorial .svc {
+    grid-template-columns: minmax(0, 5rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s-3) var(--s-6);
+    padding: clamp(1.6rem, 3.4vw, 2.6rem) 0;
+  }
+  .svc-list--editorial .svc__idx {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--line-strong);
+    line-height: 1;
+    padding-top: 0.1em;
+  }
+  .svc-list--editorial .svc__name {
+    font-size: clamp(1.25rem, 3.2vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.014em;
+  }
+  .svc-list--editorial .svc__desc {
+    margin-top: var(--s-3);
+    max-width: 56ch;
+  }
+  .svc-list--editorial .svc:hover {
+    background: transparent;
+  }
+  .svc-list--editorial .svc:hover .svc__idx {
+    color: var(--accent);
+  }
+  .svc-list--editorial .svc:hover .svc__name {
+    transform: none;
+  }
+
   /* -------------------------------------------------------------- 服务 */
   .svc-list {
     list-style: none;
@@ -1172,44 +1488,13 @@
     transition: transform var(--d-slow) var(--ease-expo);
   }
   .svc__desc {
-    grid-column: 2 / 4;
+    grid-column: 2;
     max-width: 58ch;
     margin: 0;
     font-size: 0.9375rem;
     line-height: 1.8;
     color: var(--ink-3);
     text-wrap: pretty;
-  }
-  .svc__tag {
-    grid-column: 3;
-    align-self: start;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--s-2);
-    padding: 0.3rem 0.6rem;
-    border: 1px solid var(--line);
-    border-radius: var(--r-base);
-    font-family: var(--font-latin);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-4);
-    white-space: nowrap;
-  }
-  .svc__tag i {
-    width: 5px;
-    height: 5px;
-    background: var(--ink-4);
-    border-radius: var(--r-full);
-    transition: background var(--d-mid) var(--ease-quart);
-  }
-  .svc__tag.is-ready {
-    border-color: var(--accent-line);
-    color: var(--accent);
-  }
-  .svc__tag.is-ready i {
-    background: var(--accent);
   }
 
   .svc:hover {
@@ -1514,6 +1799,96 @@
     color: var(--line);
   }
 
+  /* 求助渠道二维码：图片自带页面同色的深底，卡片只负责描边与图注 */
+  .qr {
+    margin: 0;
+    width: fit-content;
+    border: 1px solid var(--line);
+    border-radius: var(--r-mid);
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .qr__img {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+  }
+  .qr__cap {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.7rem 0.85rem 0.8rem;
+    border-top: 1px solid var(--line);
+  }
+  .qr__cap strong {
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+  .qr__cap span {
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-4);
+  }
+
+  /* ------------------------------------------------------ 联系方式收束区
+     页面最后一个视觉落点：大字号群号作为主体，二维码退为辅助。
+     刻意不做卡片，用强对比的字号把视线收住。 */
+  .contact-close {
+    display: grid;
+    gap: var(--s-7);
+    align-items: end;
+  }
+  .contact-close__ask {
+    margin: 0 0 var(--s-3);
+    font-size: var(--t-sm);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+  }
+  .contact-close__num {
+    display: block;
+    margin: 0;
+    font-family: var(--font-latin);
+    font-size: clamp(2.75rem, 10vw, 5.5rem);
+    font-weight: 800;
+    font-stretch: 112%;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+  .contact-close__hint {
+    max-width: 34ch;
+    margin: var(--s-4) 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+  /* 二维码退为辅助：只留图形与一行小注，不加外框 */
+  .contact-close__qr {
+    margin: 0;
+    width: fit-content;
+  }
+  .contact-close__qr img {
+    display: block;
+    width: 100%;
+    max-width: 168px;
+    height: auto;
+  }
+  .contact-close__qr figcaption {
+    margin-top: var(--s-3);
+    font-family: var(--font-latin);
+    font-size: var(--t-micro);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+  }
+
   /* 待补充标记 */
   .todo {
     display: inline-flex;
@@ -1603,11 +1978,21 @@
     .about__grid {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     }
+    /* 「我们是谁」：左侧叙述为主，右侧三条原则靠上对齐，主次分明 */
+    .about__lead {
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+      gap: clamp(2rem, 5vw, 5rem);
+    }
     .docs__grid {
       grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr);
     }
     .hero__meta {
       display: block;
+    }
+    /* 联系方式收束：左群号为主体，右侧二维码辅助 */
+    .contact-close {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: clamp(2rem, 6vw, 6rem);
     }
   }
 
@@ -1616,7 +2001,7 @@
       display: none;
     }
 
-    /* 小屏把状态标签挪到标题下方独立一行，避免挤压服务名 */
+    /* 小屏服务条目收窄序号列 */
     .svc {
       grid-template-columns: 2rem minmax(0, 1fr);
     }
@@ -1626,14 +2011,85 @@
     .svc__name {
       grid-row: 1;
     }
-    .svc__tag {
+    .svc__desc {
       grid-row: 2;
       grid-column: 2;
-      justify-self: start;
     }
-    .svc__desc {
-      grid-row: 3;
+
+    /* 小屏图注改成竖排，控制条换行避免挤在一起 */
+    .gallery__bar {
+      flex-wrap: wrap;
+      gap: var(--s-3);
+    }
+    .gallery__dots {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    /* 小屏画面改用 4:3，给图注让出高度；图注只留标题 + 一行提要 */
+    .gallery__stage {
+      aspect-ratio: 4 / 3;
+    }
+    .gallery__cap {
+      gap: 0;
+      padding: 0.7rem 0.85rem 0.8rem;
+    }
+    .gallery__cap-title {
+      font-size: 0.9375rem;
+      line-height: 1.4;
+    }
+    .gallery__cap-desc {
+      /* 小屏最多两行，超出省略，避免图注把整块撑高 */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      margin-top: 0.1rem;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+
+    /* 小屏二维码居中，宽度收窄以免独占一屏 */
+    .qr {
+      margin-inline: auto;
+    }
+    .qr__img {
+      max-width: 200px;
+    }
+
+    /* 小屏档案：字段列收窄，值换到下一行，避免窄屏挤压 */
+    .archive__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+    .archive__key {
+      padding-top: 0;
+    }
+
+    /* 小屏编辑式服务条目：编号回到行首，不再独立成列 */
+    .svc-list--editorial .svc {
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      gap: var(--s-2) var(--s-3);
+    }
+    .svc-list--editorial .svc__idx {
+      grid-row: 1;
+      font-size: clamp(1.125rem, 5vw, 1.5rem);
+    }
+    .svc-list--editorial .svc__name {
+      grid-row: 1;
+    }
+    .svc-list--editorial .svc__desc {
+      grid-row: 2;
       grid-column: 2;
+      margin-top: var(--s-2);
+    }
+
+    /* 小屏联系方式收束：群号换行到整块宽度，二维码居中跟随 */
+    .contact-close__qr {
+      margin-inline: auto;
+    }
+    .contact-close__hint {
+      max-width: 100%;
     }
 
     /* 小屏把读数面板压成一行，保证英雄区不被撑高 */
@@ -1716,6 +2172,10 @@
     }
     .menu,
     .menu__item {
+      transition: none;
+    }
+    .gallery__slide,
+    .gallery__slide.is-current {
       transition: none;
     }
     *,

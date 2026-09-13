@@ -23,7 +23,7 @@ export const siteConfig = {
   tagline: "志愿技术服务 · 面向全校师生",
 
   description:
-    "浙江农林大学电脑医院的社团综合服务平台。志愿性计算机技术服务：校园网认证排障、硬件维修与保养、系统与软件安装、蓝屏与驱动排查、磁盘与数据问题。",
+    "浙江农林大学电脑医院的社团综合服务平台。志愿性计算机技术服务：电脑散热模组深度清理、硬件故障排查、系统与软件问题处理、网络问题排查、计算机基础答疑。",
 
   /** 正式域名待绑定后替换 */
   url: "https://github.com/ZAFU-PCHospital",
@@ -54,20 +54,27 @@ export const siteConfig = {
   },
 } as const;
 
-/** 求助渠道（无链接，静态展示） */
+/** 求助渠道（静态展示） */
 export const contactChannels: readonly LinkItem[] = [
   {
-    kind: "现场",
-    title: "电脑医院值班室",
-    description: "具体地点与值班时间需社团确认后填入",
-    pending: true,
+    kind: "活动",
+    title: "线下问诊活动",
+    description: "具体时间地点不定期公布，请留意群内通知",
   },
   {
     kind: "线上",
-    title: "智慧浙农林 · 网络报修",
-    description: "校园网相关问题可在此提交，也可到值班室现场询问",
+    title: "QQ 群",
+    description: "532502904 · 报名、咨询与活动通知都在群里",
   },
 ];
+
+/** 求助渠道二维码（与 contactChannels 的 QQ 群对应） */
+export const contactQr = {
+  src: "/qq-group-qrcode-accent.png",
+  alt: "浙江农林大学电脑医院 QQ 群二维码，群号 532502904",
+  caption: "扫码加入 QQ 群",
+  hint: "群号 532502904",
+} as const;
 
 /** 常用入口（外链） */
 export const quickLinks: readonly LinkItem[] = [
