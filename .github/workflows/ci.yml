@@ -1,0 +1,226 @@
+# 官网构建与站内文档的持续集成
+#
+# 为什么需要它：仓库此前**没有任何 CI**，而「lint/build 必须通过」只写在文档里，
+# 合并前没有任何机器检查。站内文档集成（/docs → /handbook/）尤其容易漏：
+# 只跑 pnpm build:site 也能「构建成功」，但 /handbook/ 会整片 404，
+# 而本仓库**没有配置部署前的任何拦截**。这个 workflow 就是那道拦截。
+#
+# 触发：
+#   - pull_request → main：改动进 main 之前先验一遍（不部署）
+#   - push → main：合并后再验一遍，通过则调用部署
+#   - workflow_dispatch：手动触发，可选文档版本与是否部署
+#
+# 手动要做的两件事（不在代码里）：
+#   1. 把本文件的检查设为 main 的必需状态检查（分支保护）—— 否则它只是"跑给你看"，
+#      不会真的拦住合并。当前 main 未启用任何分支保护。
+#   2. 配置仓库变量 DEPLOY_COMMAND（部署命令）与可选的 DOCS_REF（文档仓库分支）。
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      docs_ref:
+        description: 文档仓库的分支/标签（留空则用仓库变量 DOCS_REF，再否则 main）
+        required: false
+        type: string
+      deploy:
+        description: 手动触发时是否调用部署
+        required: false
+        type: boolean
+        default: false
+
+# 同一分支上新的推送取消上一次未完成的运行，避免排队堆积
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # mdBook 版本固定，不用 latest —— 构建产物要可复现（manifest 里记录了文档版本，
+  # 若 mdBook 版本漂移，产出的 HTML 也可能变）。升级时改这一处。
+  MDBOOK_VERSION: v0.5.4
+  DOCS_REPO: ZAFU-PCHospital/ZAFU-PCHospital-Doc
+
+jobs:
+  verify:
+    name: 校验与构建
+    runs-on: ubuntu-latest
+    outputs:
+      # 把「校验过的那个文档版本」传给部署 job，保证部署的就是验证过的内容
+      docs_sha: ${{ steps.docs.outputs.sha }}
+    steps:
+      - name: 检出官网仓库
+        uses: actions/checkout@v4
+        with:
+          path: .
+
+      - name: 确定文档版本
+        id: docs
+        env:
+          DOCS_REF: ${{ inputs.docs_ref || vars.DOCS_REF || 'main' }}
+        run: |
+          set -euo pipefail
+          sha=$(git ls-remote "https://github.com/${DOCS_REPO}.git" "refs/heads/${DOCS_REF}" | cut -f1)
+          if [ -z "${sha}" ]; then
+            echo "::error::文档仓库 ${DOCS_REPO} 上找不到分支 ${DOCS_REF}"
+            exit 1
+          fi
+          echo "文档版本：${DOCS_REPO} ${DOCS_REF} → ${sha}"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+
+      - name: 检出文档仓库到 .docs-source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DOCS_REPO }}
+          ref: ${{ steps.docs.outputs.sha }}
+          path: .docs-source
+          fetch-depth: 1
+
+      # 固定版本、官方 release 二进制：不依赖第三方 action，与本地开发者的做法一致
+      # （README「站内技术文档」也是让开发者下载 release 二进制）。
+      - name: 安装 mdBook（固定版）
+        run: |
+          set -euo pipefail
+          url="https://github.com/rust-lang/mdBook/releases/download/${MDBOOK_VERSION}/mdbook-${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fsSL "$url" -o /tmp/mdbook.tar.gz
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf /tmp/mdbook.tar.gz -C "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/mdbook" --version | grep -F "${MDBOOK_VERSION#v}" \
+            || { echo "::error::mdBook 版本与固定的 ${MDBOOK_VERSION} 不一致"; exit 1; }
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # pnpm lint = ESLint + 主题调色板一致性校验
+      - name: 检查（lint + 调色板一致性）
+        run: pnpm lint
+
+      # 完整构建：文档 + 官网。不要用 build:site 代替 —— 那会产出缺 /handbook/ 的站点。
+      - name: 完整构建（文档 + 官网）
+        env:
+          DOCS_SHA: ${{ steps.docs.outputs.sha }}
+        run: pnpm build
+
+      - name: 校验构建产物
+        run: |
+          set -euo pipefail
+          test -f public/handbook/index.html                 || { echo "::error::缺少 public/handbook/index.html"; exit 1; }
+          test -n "$(find public/handbook -name 'searchindex*' -print -quit)"   || { echo "::error::文档产物缺少 searchindex"; exit 1; }
+          test -n "$(find public/handbook -name 'pc-hospital*.css' -print -quit)" || { echo "::error::文档产物缺少官网主题 CSS"; exit 1; }
+          test -n "$(find public/handbook -name 'pc-hospital*.js' -print -quit)"  || { echo "::error::文档产物缺少官网主题 JS"; exit 1; }
+          node -e '
+            const m = require("./src/data/doc-manifest.json");
+            if (!m?.tree?.length || !m?.meta?.counts) { console.error("::error::doc-manifest.json 结构异常"); process.exit(1); }
+            console.log("清单：", JSON.stringify(m.meta.counts), "revision=" + m.meta.sourceRevision);
+          '
+
+      # 生产服务冒烟：证明"部署出去的产物"真的能访问到站内文档，
+      # 而不只是磁盘上有文件。这类问题（构建成功但 URL 404）正是本次要防的。
+      - name: 冒烟测试（生产服务访问站内文档）
+        run: |
+          set -euo pipefail
+          pnpm start --port 3311 > /tmp/next-start.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid 2>/dev/null || true' EXIT
+
+          ready=""
+          for _ in $(seq 1 40); do
+            if curl -fsS -o /dev/null "http://127.0.0.1:3311/docs"; then ready="yes"; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then echo "::error::生产服务未在 40s 内就绪"; cat /tmp/next-start.log; exit 1; fi
+
+          for path in / /about /join /docs /handbook/ /handbook/index.html; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -L "http://127.0.0.1:3311${path}")
+            echo "${path} → ${code}"
+            [ "$code" = "200" ] || { echo "::error::${path} 返回 ${code}"; exit 1; }
+          done
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-with-handbook
+          path: |
+            .next
+            public/handbook
+          retention-days: 3
+
+  deploy:
+    name: 部署
+    needs: verify
+    runs-on: ubuntu-latest
+    # 只在 main 上部署；PR 与手动触发默认不部署
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.deploy)
+    steps:
+      - name: 检出官网仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # 用 verify 里已解析并校验过的那个 sha，而不是重新解一次引用 ——
+      # 否则部署的可能不是刚刚验证过的文档版本。
+      # （若部署目标想要"部署已验证产物"而非重新构建，可改为 download-artifact
+      #   下载 site-with-handbook；代价是部署环境还需要 node_modules 才能 next start。）
+      - name: 检出文档仓库到 .docs-source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DOCS_REPO }}
+          ref: ${{ needs.verify.outputs.docs_sha }}
+          path: .docs-source
+          fetch-depth: 1
+
+      - name: 安装 mdBook（固定版）
+        run: |
+          set -euo pipefail
+          url="https://github.com/rust-lang/mdBook/releases/download/${MDBOOK_VERSION}/mdbook-${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -fsSL "$url" -o /tmp/mdbook.tar.gz
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf /tmp/mdbook.tar.gz -C "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: 完整构建（文档 + 官网）
+        run: pnpm build
+
+      # 部署目标尚未确定，所以这里只留一个由仓库变量驱动的钩子：
+      # 配置 仓库变量 DEPLOY_COMMAND（例如把 .next 与 public/handbook 同步到服务器、
+      # 推镜像、或调用托管平台的发布 API），这个步骤就会执行它。
+      # 未配置时明确提示，而不是静默跳过。
+      - name: 调用部署命令
+        if: ${{ vars.DEPLOY_COMMAND != '' }}
+        env:
+          DEPLOY_COMMAND: ${{ vars.DEPLOY_COMMAND }}
+        run: |
+          set -euo pipefail
+          echo "执行 DEPLOY_COMMAND：${DEPLOY_COMMAND}"
+          bash -c "${DEPLOY_COMMAND}"
+
+      - name: 未配置部署命令
+        if: ${{ vars.DEPLOY_COMMAND == '' }}
+        run: |
+          echo "::warning::尚未配置部署目标。请在仓库 Settings → Variables 里设置 DEPLOY_COMMAND，"
+          echo "::warning::或在 .github/workflows/ci.yml 的 deploy job 里写死具体部署步骤。"

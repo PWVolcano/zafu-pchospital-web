@@ -217,6 +217,29 @@ THEME_MODE=dark   CAP_SEL="#services" node tools/inspect.mjs URL shots/02-home-s
 
 ---
 
+## 持续集成（CI）
+
+`.github/workflows/ci.yml` 在 **PR** 与 **push 到 `main`** 时运行（也可手动触发）：
+
+1. 解析并固定文档版本（`DOCS_REF` → sha，保证构建可复现）
+2. 把文档仓库检出到 `.docs-source/`
+3. 安装**固定版** mdBook（版本写在 workflow 的 `MDBOOK_VERSION`，不用 `latest`）
+4. `pnpm install` → `pnpm lint` → `pnpm build`（含文档）
+5. 校验构建产物：`public/handbook/index.html`、`searchindex`、官网主题 CSS/JS、清单结构
+6. 起生产服务冒烟：`/`、`/about`、`/join`、`/docs`、`/handbook/` 必须全部 200
+7. `main` 上通过后调用部署
+
+**有两件事只能在 GitHub 上操作才生效**（代码里做不到）：
+
+- **把 `CI / 校验与构建` 设为 `main` 的必需状态检查**（Settings → Branches）。
+  当前 `main` **未启用任何分支保护**；不设置的话 CI 只是"跑给你看"，拦不住合并。
+- **配置部署**：设置仓库变量 `DEPLOY_COMMAND`（部署目标尚未确定，见 workflow 内注释）。
+  未配置时部署步骤只打印 `::warning::`，不会失败。
+
+可选：设置仓库变量 `DOCS_REF` 指定文档仓库的分支（默认 `main`）。
+
+---
+
 ## 参与开发
 
 1. 读 [`AGENTS.md`](AGENTS.md) 与 [`docs/design-system.md`](docs/design-system.md)
