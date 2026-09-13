@@ -1,6 +1,9 @@
 import { execFileSync } from "node:child_process";
 import {
+  copyFileSync,
+  cpSync,
   existsSync,
+  mkdtempSync,
   mkdirSync,
   readFileSync,
   readdirSync,
@@ -8,6 +11,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -16,9 +20,21 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const sourceRoot = path.resolve(projectRoot, process.env.DOCS_SOURCE_DIR || ".docs-source");
 const outputRoot = path.resolve(projectRoot, "public", "handbook");
 const manifestPath = path.resolve(projectRoot, "src", "data", "doc-manifest.json");
+const themeRoot = path.resolve(projectRoot, "tools", "mdbook-theme");
+const themeCssPath = path.join(themeRoot, "pc-hospital.css");
+const themeJsPath = path.join(themeRoot, "pc-hospital.js");
 const summaryPath = path.join(sourceRoot, "src", "SUMMARY.md");
 const bookConfigPath = path.join(sourceRoot, "book.toml");
 const repoUrl = "https://github.com/ZAFU-PCHospital/ZAFU-PCHospital-Doc";
+const buildSourceRoot = mkdtempSync(path.join(tmpdir(), "zafu-pchospital-docs-"));
+
+process.once("exit", () => {
+  const resolvedTempRoot = path.resolve(tmpdir());
+  const resolvedBuildSource = path.resolve(buildSourceRoot);
+  if (resolvedBuildSource.startsWith(`${resolvedTempRoot}${path.sep}`)) {
+    rmSync(resolvedBuildSource, { recursive: true, force: true });
+  }
+});
 
 function fail(message) {
   throw new Error(`[docs:build] ${message}`);
@@ -33,6 +49,8 @@ function assertSource() {
   }
   if (!existsSync(bookConfigPath)) fail(`缺少 mdBook 配置：${bookConfigPath}`);
   if (!existsSync(summaryPath)) fail(`缺少文档目录：${summaryPath}`);
+  if (!existsSync(themeCssPath)) fail(`缺少官网 mdBook 主题样式：${themeCssPath}`);
+  if (!existsSync(themeJsPath)) fail(`缺少官网 mdBook 主题脚本：${themeJsPath}`);
 }
 
 function toPosix(value) {
@@ -153,27 +171,33 @@ function walkFiles(directory) {
   });
 }
 
-function injectReturnLink() {
+function customizeHtml() {
   const marker = 'data-pc-hospital-return="true"';
   const link =
-    `<a href="/docs" class="icon-button" title="返回电脑医院官网" ` +
-    `aria-label="返回电脑医院官网" ${marker}><i class="fa fa-home"></i></a>`;
+    `<a href="/docs" class="pc-hospital-return" title="返回电脑医院官网" ${marker}>` +
+    `<span aria-hidden="true">←</span><span>电脑医院官网</span></a>`;
+  const themeBootstrapMarker = 'data-pc-hospital-theme-bootstrap="true"';
+  const themeBootstrap = `<script ${themeBootstrapMarker}>(function(){try{var mode=localStorage.getItem("zafu-pchospital:theme-mode");if(mode==="dark"){localStorage.setItem("mdbook-theme","coal")}else if(mode==="normal"){localStorage.setItem("mdbook-theme","light")}}catch(e){}})();</script>`;
   let injected = 0;
 
   for (const htmlPath of walkFiles(outputRoot).filter((file) => file.endsWith(".html"))) {
-    const html = readFileSync(htmlPath, "utf8");
-    if (html.includes(marker)) continue;
-    if (!html.includes('<div class="left-buttons">')) continue;
-    writeFileSync(
-      htmlPath,
-      html.replace('<div class="left-buttons">', `<div class="left-buttons">${link}`),
-    );
-    injected += 1;
+    let html = readFileSync(htmlPath, "utf8");
+    if (!html.includes(themeBootstrapMarker) && html.includes("<!-- Custom HTML head -->")) {
+      html = html.replace(
+        "<!-- Custom HTML head -->",
+        `<!-- Custom HTML head -->${themeBootstrap}`,
+      );
+    }
+    if (!html.includes(marker) && html.includes('<div class="left-buttons">')) {
+      html = html.replace('<div class="left-buttons">', `<div class="left-buttons">${link}`);
+      injected += 1;
+    }
+    writeFileSync(htmlPath, html);
   }
 
   const indexHtml = readFileSync(path.join(outputRoot, "index.html"), "utf8");
-  if (!injected || !indexHtml.includes(marker)) {
-    fail("无法向 mdBook 导航加入返回官网入口，请检查当前 mdBook 主题结构");
+  if (!injected || !indexHtml.includes(marker) || !indexHtml.includes(themeBootstrapMarker)) {
+    fail("无法向 mdBook 加入官网导航或主题引导，请检查当前 mdBook 主题结构");
   }
 }
 
@@ -184,6 +208,12 @@ function validateAssets() {
   if (!files.some((file) => file.endsWith(".css"))) fail("mdBook 产物中没有 CSS 资源");
   if (!files.some((file) => /^searchindex(?:[.-])/.test(path.basename(file)))) {
     fail("mdBook 已启用搜索，但产物中没有 searchindex.*");
+  }
+  if (!files.some((file) => /^pc-hospital(?:[.-]).*\.css$/.test(path.basename(file)))) {
+    fail("mdBook 产物中没有电脑医院自定义主题 CSS");
+  }
+  if (!files.some((file) => /^pc-hospital(?:[.-]).*\.js$/.test(path.basename(file)))) {
+    fail("mdBook 产物中没有电脑医院自定义主题 JavaScript");
   }
 }
 
@@ -243,6 +273,18 @@ function countEntries(nodes) {
 
 assertSource();
 
+cpSync(sourceRoot, buildSourceRoot, {
+  recursive: true,
+  filter(source) {
+    const relativePath = path.relative(sourceRoot, source);
+    if (!relativePath) return true;
+    const firstSegment = relativePath.split(path.sep)[0];
+    return firstSegment !== ".git" && firstSegment !== "book";
+  },
+});
+copyFileSync(themeCssPath, path.join(buildSourceRoot, "pc-hospital.css"));
+copyFileSync(themeJsPath, path.join(buildSourceRoot, "pc-hospital.js"));
+
 if (outputRoot !== path.resolve(projectRoot, "public", "handbook")) {
   fail(`拒绝清理非预期目录：${outputRoot}`);
 }
@@ -250,17 +292,28 @@ rmSync(outputRoot, { recursive: true, force: true });
 mkdirSync(outputRoot, { recursive: true });
 
 console.log(`[docs:build] source: ${sourceRoot}`);
-execFileSync(process.env.MDBOOK_BIN || "mdbook", ["build", sourceRoot, "--dest-dir", outputRoot], {
-  cwd: projectRoot,
-  env: { ...process.env, MDBOOK_OUTPUT__HTML__SITE_URL: '"/handbook/"' },
-  stdio: "inherit",
-});
+execFileSync(
+  process.env.MDBOOK_BIN || "mdbook",
+  ["build", buildSourceRoot, "--dest-dir", outputRoot],
+  {
+    cwd: projectRoot,
+    env: {
+      ...process.env,
+      MDBOOK_OUTPUT__HTML__SITE_URL: '"/handbook/"',
+      MDBOOK_OUTPUT__HTML__DEFAULT_THEME: '"light"',
+      MDBOOK_OUTPUT__HTML__PREFERRED_DARK_THEME: '"coal"',
+      MDBOOK_OUTPUT__HTML__ADDITIONAL_CSS: '["pc-hospital.css"]',
+      MDBOOK_OUTPUT__HTML__ADDITIONAL_JS: '["pc-hospital.js"]',
+    },
+    stdio: "inherit",
+  },
+);
 
 const cnamePath = path.join(outputRoot, "CNAME");
 if (existsSync(cnamePath) && statSync(cnamePath).isFile()) rmSync(cnamePath);
 
 validateAssets();
-injectReturnLink();
+customizeHtml();
 
 const { tree, pages } = parseSummary();
 const counts = countEntries(tree);
