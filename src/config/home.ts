@@ -23,6 +23,27 @@ export const heroContent = {
   lead: "面向全校师生的志愿性计算机技术服务。拆机清灰、系统与驱动、校园网认证、蓝屏与磁盘排查，能处理的当场处理，处理不了的当面说明白。",
 } as const;
 
+export type HeroAction = {
+  label: string;
+  /**
+   * 目标地址。留空表示对应页面尚未就绪，按钮渲染为原生 button、点击不跳转；
+   * 页面完成后把地址填进来即可生效，组件不需要改动。
+   */
+  href: string;
+};
+
+/**
+ * 首页 Hero 的行动按钮
+ *
+ * 首页只保留「维修报修」与「查看文档」两个功能入口，其余功能按钮一律不保留。
+ * 二者对应哪个是主按钮、哪个是次级按钮，属于呈现方式，写在 Hero.tsx 里。
+ */
+export const heroActions: Record<"repair" | "docs", HeroAction> = {
+  /* TODO: /repair 页面就绪后填入 "/repair" */
+  repair: { label: "维修报修", href: "" },
+  docs: { label: "查看文档", href: "/docs" },
+};
+
 export const aboutContent = {
   title: "关于电脑医院",
   lead: "电脑医院是浙江农林大学的志愿性学生技术社团。我们做的事很具体：把出问题的电脑修好，把说不清的网络问题查清，再把攒下来的经验整理成任何人都能查的文档。",
