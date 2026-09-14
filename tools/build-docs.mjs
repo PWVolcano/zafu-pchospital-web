@@ -390,6 +390,7 @@ const manifest = {
   pages,
 };
 
+mkdirSync(path.dirname(manifestPath), { recursive: true });
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`[docs:build] revision: ${sourceRevision}`);
 console.log(`[docs:build] manifest: ${counts.ready} ready / ${counts.pending} pending`);
