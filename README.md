@@ -66,7 +66,7 @@ pnpm dev
 | -------------------- | ------------------------------------------------------------ |
 | `pnpm dev`           | 启动开发服务器                                               |
 | `pnpm build`         | 生产构建（**含站内技术文档**，需要 mdBook，见下节）          |
-| `pnpm build:site`    | 只编译官网、跳过文档（文档已生成，或本机没有 mdBook 时用）   |
+| `pnpm build:site`    | 只编译官网，跳过文档构建（用当时磁盘上的清单，**不要用于部署**） |
 | `pnpm docs:build`    | 只生成站内技术文档到 `public/handbook/`                      |
 | `pnpm start`         | 以生产模式启动（需先 build）                                 |
 | `pnpm lint`          | ESLint 检查 + 调色板一致性校验                               |
@@ -92,7 +92,17 @@ pnpm dev
    想用本地已有的检出：`DOCS_SOURCE_DIR=/path/to/ZAFU-PCHospital-Doc pnpm build`。
    完全离线：`DOCS_OFFLINE=1`（但必须已经先有源码）。
 
-只开发官网页面时不必装 mdBook：日常 `pnpm dev` 照旧，构建用 `pnpm build:site`。
+只开发官网页面时不必装 mdBook：`pnpm install` 会通过 `postinstall` 写一份
+**占位清单**（`src/data/doc-manifest.json`，目录为空），所以 `pnpm dev` 与
+`pnpm build:site` 开箱可用；要看真实目录再跑 `pnpm docs:build`（需要 mdBook）。
+
+> `src/data/doc-manifest.json` 是**构建产物**（已 gitignore、不进仓库），
+> 而 `src/lib/docs.ts` 是静态 import 它 —— 文件缺失时 `next dev` / `next build`
+> 会直接报 `Module not found`。`tools/ensure-doc-manifest.mjs` 负责在缺失时补占位清单，
+> 已挂在 `postinstall`、`predev`、`prebuild:site` 上。
+>
+> `pnpm build:site` 用的是**当时磁盘上的**清单：若还是占位清单，站点 `/docs` 会显示
+> 0 个条目。**不要用它部署** —— 部署必须用 `pnpm build`（含文档构建）。
 
 > 注意 `public/handbook/` 是构建产物：`pnpm dev` 下 `/handbook/` 是空的
 > （`/handbook` → `/handbook/index.html` 会 404），要本地看文档先跑一次 `pnpm docs:build`。
