@@ -27,6 +27,138 @@
   font-display: swap;
 }
 
+/* ======================================================= 可插值的主题令牌 */
+/* 为什么需要这一段（改动前务必读完）：
+
+   主题切换要「渐变」而不是「跳变」，前提是令牌本身能被引擎插值。
+   未注册的自定义属性在浏览器眼里只是一串待替换的文本，换主题时整串被一起换掉，
+   那一帧就是硬跳变 —— 中间态根本不存在。
+
+   用 @property 声明 syntax: "<color>" 之后，令牌成为真正的颜色值，
+   可以像普通属性一样被 transition 插值。
+
+   为什么 transition 声明在 <html> 的令牌上，而不是逐个元素上：
+   站内不少视觉是令牌二次合成的 —— 索引栏的线性渐变、首页水印的
+   -webkit-text-stroke、准星的 mix-blend-mode。这些属性本身不可插值
+   （渐变与混合模式没有中间态），但它们的**输入值**可以。所以只让令牌动，
+   全站自动跟着平滑，新增组件也不必各自处理。
+
+   注册范围的取舍（不要随手扩大）：
+   · 只注册「字面色值」的令牌。
+   · 像 --deco-grid-line: var(--line)、--rail-panel: var(--surface-1) 这类
+     **派生引用**故意不注册 —— 它们每帧会重新解析被引用的令牌，天然跟随中间值；
+     再注册一层反而让过渡叠加、出现滞后。
+   · --t-page-title 这类带视口单位的 clamp 也**不能**注册：注册后的长度会被
+     绝对化成 px，窗口缩放时不再重新计算，等于破坏响应式。
+
+   另外两个令牌**不注册，也因此不参与过渡**。它们不需要被插值，
+   注册（把值纳入可动画类型）本身没有任何收益，只会多出一处
+   容易被误加进过渡列表的口子：
+   · --deco-scan：全屏扫描渐变，透明度仅 0.03~0.05。一旦被写进过渡列表，
+     每帧就多一次全屏光栅化，而肉眼分辨不出差别，所以不注册更省。
+   · --page-title-leading：行高是布局属性，本身不参与颜色插值；若被过渡，
+     会让内页文字逐帧重排。而内页标题的字号本就是瞬变的，
+     两者一起瞬变、再由落墨动效收尾更干净。 */
+
+@property --bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --bg-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --surface-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --surface-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --surface-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --line {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --line-soft {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --line-strong {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ink-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ink-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --ink-4 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --accent-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --accent-on {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --accent-wash {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --accent-line {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --deco-watermark {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+/* 非颜色令牌：圆角可以插值，让「UI 的形状」也一起过渡。
+   注意 syntax 必须与实际取值类型相符，否则令牌会直接失效。 */
+@property --r-frame {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 /* ============================================================== 设计令牌 */
 /* 结构说明（改动前先读这段）：
      1. `:root`           主题无关令牌（字体/字号/间距/半径/动效/栅格）
@@ -133,6 +265,11 @@
   --d-mid: 260ms;
   --d-slow: 420ms;
   --d-enter: 760ms;
+  /* 主题切换专用时长。比 --d-slow 更长：全站几十个令牌同时插值，
+     太快会显得「闪一下」而不是「渐变过去」。
+     src/lib/theme.ts 会读这个值来决定 html.theme-shift 停留多久，
+     因此它是唯一来源 —— 改这里就够了，不要再去 JS 里写死。 */
+  --d-theme: 560ms;
 
   /* 栅格 */
   --rail: 88px;
@@ -259,6 +396,33 @@ html[data-theme="black-yellow"] {
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+
+    /* 画布底色也走令牌：color-scheme 无法插值，切换时会瞬时生效，
+       若画布没有自己的过渡色，就会在令牌插值到位前闪出一帧系统底色。 */
+    background: var(--bg);
+
+    /* 主题切换的全部「颜色动效」就靠这一条：令牌在源头插值，
+       全站引用它的地方自动跟随，不需要在几百个元素上各写一遍 transition。 */
+    transition:
+      --bg var(--d-theme) var(--ease-quart),
+      --bg-deep var(--d-theme) var(--ease-quart),
+      --surface-1 var(--d-theme) var(--ease-quart),
+      --surface-2 var(--d-theme) var(--ease-quart),
+      --surface-3 var(--d-theme) var(--ease-quart),
+      --line var(--d-theme) var(--ease-quart),
+      --line-soft var(--d-theme) var(--ease-quart),
+      --line-strong var(--d-theme) var(--ease-quart),
+      --ink var(--d-theme) var(--ease-quart),
+      --ink-2 var(--d-theme) var(--ease-quart),
+      --ink-3 var(--d-theme) var(--ease-quart),
+      --ink-4 var(--d-theme) var(--ease-quart),
+      --accent var(--d-theme) var(--ease-quart),
+      --accent-deep var(--d-theme) var(--ease-quart),
+      --accent-on var(--d-theme) var(--ease-quart),
+      --accent-wash var(--d-theme) var(--ease-quart),
+      --accent-line var(--d-theme) var(--ease-quart),
+      --deco-watermark var(--d-theme) var(--ease-quart),
+      --r-frame var(--d-theme) var(--ease-quart);
   }
 
   body {
@@ -514,6 +678,32 @@ html[data-theme="black-yellow"] {
   html.js .reveal.is-in {
     opacity: 1;
     transform: none;
+  }
+  /* --------------------------------------------- 主题切换：重新落墨 */
+  /* 颜色交给令牌插值，文字再走一遍「重新落墨」：
+     标题轻微下落归位 + 淡入，让视线在切换那一下有个落点。
+
+     只作用于**已揭示完成**的 .reveal（即 .is-in）与首页主标题：
+     · 还没揭示的 .reveal 自身 opacity 仍是 0，绝不能碰 ——
+       否则会先被动画显示出来、动画结束又缩回去，闪一下；
+     · .hero__title 的子元素另有 line-in 进场动画，动它的父级互不干扰。 */
+  @keyframes theme-ink {
+    from {
+      opacity: 0.2;
+      transform: translateY(0.14em);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  html.theme-shift .hero__title,
+  html.theme-shift .sec-head.reveal.is-in,
+  html.theme-shift .sec-title.reveal.is-in,
+  html.theme-shift .lead.reveal.is-in,
+  html.theme-shift .hero__lead.reveal.is-in {
+    animation: theme-ink var(--d-theme) var(--ease-quart) both;
   }
 
   /* ------------------------------------------------------ 顶部进度线 */
@@ -883,6 +1073,34 @@ html[data-theme="black-yellow"] {
     border-color: var(--accent-line);
     background: var(--accent-wash);
     font-weight: 800;
+  }
+
+  /* 切模式那一瞬间，被选中的按钮自己也有回应：图标翻转归位 + 整体轻微上浮。
+     只在 html.theme-shift 期间播放，所以首屏加载时不会无端动一下 ——
+     纯 CSS 做不到「属性变化时补播动画」，这个临时类就是那个触发器。 */
+  html.theme-shift .theme-switch__btn[aria-pressed="true"] {
+    animation: theme-btn-lift var(--d-theme) var(--ease-expo) both;
+  }
+  html.theme-shift .theme-switch__btn[aria-pressed="true"] svg {
+    animation: theme-btn-icon var(--d-theme) var(--ease-expo) both;
+  }
+  @keyframes theme-btn-lift {
+    from {
+      transform: translateY(3px);
+      opacity: 0.55;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes theme-btn-icon {
+    from {
+      transform: rotate(-75deg) scale(0.72);
+    }
+    to {
+      transform: none;
+    }
   }
 
   /* 桌面索引栏：图标在上、字样在下，宽度收进 88px 栏内 */
@@ -2506,6 +2724,18 @@ html[data-theme="black-yellow"] {
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
+    }
+
+    /* 主题切换：令牌插值已被下面全局的 transition-duration: 0.01ms 压成瞬时，
+       这里再显式关掉落墨与按钮动画 —— 0.01ms 的动画仍会留下填充态。 */
+    html.theme-shift .hero__title,
+    html.theme-shift .sec-head.reveal.is-in,
+    html.theme-shift .sec-title.reveal.is-in,
+    html.theme-shift .lead.reveal.is-in,
+    html.theme-shift .hero__lead.reveal.is-in,
+    html.theme-shift .theme-switch__btn[aria-pressed="true"],
+    html.theme-shift .theme-switch__btn[aria-pressed="true"] svg {
+      animation: none;
     }
     html.js .reveal {
       opacity: 1;
