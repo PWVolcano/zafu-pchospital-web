@@ -15,7 +15,7 @@ import { processNotice, processSteps } from "@/config/home";
 export function ProcessSection() {
   return (
     <Section id="process" labelledBy="process-title">
-      <SectionHead index="04" label="Process" />
+      <SectionHead index="02" label="Process" />
 
       <div className="sec-titlebar">
         <SectionTitle id="process-title">一次送修会经历什么</SectionTitle>
