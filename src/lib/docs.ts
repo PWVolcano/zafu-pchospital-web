@@ -6,9 +6,9 @@ import rawManifest from "@/data/doc-manifest.json";
  *
  * 数据来源：src/data/doc-manifest.json
  * 该文件由文档仓库的构建脚本生成，描述 ZAFU-PCHospital-Doc 的目录树与条目状态。
- * 正式站点不重新实现文档系统，这里只做「入口展示」：读取清单、渲染目录、跳转到文档仓库。
+ * 正式站点不重新实现文档系统，这里只做「入口展示」：读取清单、渲染目录、跳转到同域 mdBook。
  *
- * 更新清单的方式：用文档仓库的 tools/build_doc_data.py 重新生成后覆盖本文件。
+ * 更新清单的方式：运行 pnpm docs:build，从同一份文档源码构建正文并覆盖本文件。
  */
 
 export type DocNodeKind = "page" | "pending" | "group";
@@ -18,6 +18,8 @@ export type DocNode = {
   title: string;
   /** kind 为 page 时为文档路径；group 与 pending 为 null */
   path: string | null;
+  /** kind 为 page 时为 mdBook 生成的站内 HTML 路径 */
+  outputPath?: string;
   children?: DocNode[];
 };
 
@@ -26,6 +28,8 @@ export type DocMeta = {
   authors: string[];
   language: string;
   repoUrl: string;
+  /** 生成清单所使用的文档提交；本地工作树无法解析时为 local */
+  sourceRevision?: string;
   /** ISO 8601 字符串 */
   generatedAt: string;
   counts: {
@@ -51,6 +55,7 @@ export const docMeta: DocMeta = {
   authors: manifest.meta.authors ?? [],
   language: manifest.meta.language,
   repoUrl: manifest.meta.repoUrl,
+  sourceRevision: manifest.meta.sourceRevision,
   generatedAt: manifest.meta.generatedAt,
   counts: manifest.meta.counts,
 };
@@ -69,7 +74,13 @@ export const docTree: DocNode[] = (manifest.tree as DocNode[]) ?? [];
  */
 export type DocListItem =
   | { type: "group"; title: string }
-  | { type: "item"; title: string; path: string | null; pending: boolean };
+  | {
+      type: "item";
+      title: string;
+      path: string | null;
+      outputPath: string | null;
+      pending: boolean;
+    };
 
 export function flattenDocTree(nodes: readonly DocNode[], into: DocListItem[] = []): DocListItem[] {
   for (const node of nodes) {
@@ -84,6 +95,7 @@ export function flattenDocTree(nodes: readonly DocNode[], into: DocListItem[] = 
       type: "item",
       title: node.title,
       path: node.path,
+      outputPath: node.outputPath ?? null,
       pending: !ready,
     });
 
@@ -109,10 +121,16 @@ export function formatGeneratedAt(iso: string): string {
 /**
  * 生成某个文档条目在文档仓库中的地址。
  *
- * 正式站点不托管文档正文，因此条目统一跳转到 ZAFU-PCHospital-Doc 的源文件。
- * 若已绑定独立文档站（NEXT_PUBLIC_DOCS_URL），调用方可以改用站点地址。
+ * 该地址保留给“查看源文件”等 GitHub 外链；正文阅读使用 docPageUrl()。
  */
 export function docFileUrl(path: string): string {
   const { url, branch } = siteConfig.docRepo;
   return `${url}/blob/${branch}/src/${path}`;
+}
+
+/** 生成 mdBook 正文在官网同域下的阅读地址。 */
+export function docPageUrl(outputPath: string): string {
+  const encodedPath = outputPath.replaceAll("\\", "/").split("/").map(encodeURIComponent).join("/");
+
+  return `/handbook/${encodedPath}`;
 }

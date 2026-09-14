@@ -144,5 +144,5 @@ export const processNotice = {
 
 export const docsTeaser = {
   title: "全套维修与排障文档，开源可查",
-  lead: "文档仓库 ZAFU-PCHospital-Doc 收录了校园网认证、硬件保养、系统与驱动等条目，源文件全部公开。可以按目录直接查阅，也欢迎提交勘误与补充。",
+  lead: "文档仓库 ZAFU-PCHospital-Doc 收录了校园网认证、硬件保养、系统与驱动等条目。已就绪内容可在站内直接阅读，源文件保持公开，也欢迎提交勘误与补充。",
 } as const;

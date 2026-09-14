@@ -27,7 +27,7 @@
 | `/`      | 首页         | 完整复刻设计基准的六个区块                                 |
 | `/about` | 关于我们     | 内容骨架（社团介绍 / 服务范围 / 联系方式），待社团补充细节 |
 | `/join`  | 加入我们     | 内容骨架，标注为「待补充」                                 |
-| `/docs`  | 技术文档入口 | 跳转与目录入口，不重新实现文档系统                         |
+| `/docs`  | 技术文档入口 | 站内文档入口：指向 `/handbook/`（mdBook 构建，不在本站重实现） |
 
 ---
 
@@ -62,14 +62,40 @@ pnpm dev
 
 ### 常用命令
 
-| 命令                | 说明                         |
-| ------------------- | ---------------------------- |
-| `pnpm dev`          | 启动开发服务器               |
-| `pnpm build`        | 生产构建                     |
-| `pnpm start`        | 以生产模式启动（需先 build） |
-| `pnpm lint`         | ESLint 检查                  |
-| `pnpm format`       | Prettier 格式化              |
-| `pnpm format:check` | 检查格式是否符合规范         |
+| 命令                 | 说明                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| `pnpm dev`           | 启动开发服务器                                               |
+| `pnpm build`         | 生产构建（**含站内技术文档**，需要 mdBook，见下节）          |
+| `pnpm build:site`    | 只编译官网、跳过文档（文档已生成，或本机没有 mdBook 时用）   |
+| `pnpm docs:build`    | 只生成站内技术文档到 `public/handbook/`                      |
+| `pnpm start`         | 以生产模式启动（需先 build）                                 |
+| `pnpm lint`          | ESLint 检查 + 调色板一致性校验                               |
+| `pnpm check:palette` | 只跑调色板校验（官网 vs 文档站两份令牌是否一致）             |
+| `pnpm format`        | Prettier 格式化                                              |
+| `pnpm format:check`  | 检查格式是否符合规范                                         |
+
+### 站内技术文档（`/handbook`）
+
+`/docs` 页指向站内的 `/handbook/`，正文由独立仓库
+[`ZAFU-PCHospital-Doc`](https://github.com/ZAFU-PCHospital/ZAFU-PCHospital-Doc)
+在**构建期**生成。`pnpm build` 已包含这一步，所以需要两个额外前置条件：
+
+1. **mdBook**（Rust 工具链，npm 里没有）。二选一：
+
+   ```bash
+   cargo install mdbook
+   # 或从 https://github.com/rust-lang/mdBook/releases 下载对应平台的二进制，然后
+   MDBOOK_BIN=/path/to/mdbook pnpm build
+   ```
+
+2. **文档源码**：缺省会自动浅克隆到 `.docs-source/`（已 gitignore），**通常不用手动做**。
+   想用本地已有的检出：`DOCS_SOURCE_DIR=/path/to/ZAFU-PCHospital-Doc pnpm build`。
+   完全离线：`DOCS_OFFLINE=1`（但必须已经先有源码）。
+
+只开发官网页面时不必装 mdBook：日常 `pnpm dev` 照旧，构建用 `pnpm build:site`。
+
+> 注意 `public/handbook/` 是构建产物：`pnpm dev` 下 `/handbook/` 是空的
+> （`/handbook` → `/handbook/index.html` 会 404），要本地看文档先跑一次 `pnpm docs:build`。
 
 ---
 
@@ -95,9 +121,12 @@ pnpm dev
 │   ├── lib/               # 纯逻辑工具
 │   └── data/              # 文档仓库清单（构建脚本生成）
 │
-├── public/fonts/          # 品牌字体
+├── public/
+│   ├── fonts/             # 品牌字体
+│   └── handbook/          # 【生成物】站内技术文档，pnpm docs:build 产出，已 gitignore
 ├── shots/                 # 视觉验证截图（按显示模式命名，见「本地验证」）
-├── tools/                 # 本地验证脚本（CDP 诊断）
+├── tools/                 # 文档构建 + 调色板校验 + 本地验证（CDP 诊断）
+├── .docs-source/          # 【本地产物】文档仓库检出，构建时自动浅克隆，已 gitignore
 └── zafu-pchospital-site/  # 【只读】设计基准 Demo
 ```
 
@@ -188,11 +217,36 @@ THEME_MODE=dark   CAP_SEL="#services" node tools/inspect.mjs URL shots/02-home-s
 
 ---
 
+## 持续集成（CI）
+
+`.github/workflows/ci.yml` 在 **PR** 与 **push 到 `main`** 时运行（也可手动触发）：
+
+1. 解析并固定文档版本（`DOCS_REF` → sha，保证构建可复现）
+2. 把文档仓库检出到 `.docs-source/`
+3. 安装**固定版** mdBook（版本写在 workflow 的 `MDBOOK_VERSION`，不用 `latest`）
+4. `pnpm install` → `pnpm lint` → `pnpm build`（含文档）
+5. 校验构建产物：`public/handbook/index.html`、`searchindex`、官网主题 CSS/JS、清单结构
+6. 起生产服务冒烟：`/`、`/about`、`/join`、`/docs`、`/handbook/` 必须全部 200
+7. `main` 上通过后调用部署
+
+**有两件事只能在 GitHub 上操作才生效**（代码里做不到）：
+
+- **把 `CI / 校验与构建` 设为 `main` 的必需状态检查**（Settings → Branches）。
+  当前 `main` **未启用任何分支保护**；不设置的话 CI 只是"跑给你看"，拦不住合并。
+- **配置部署**：设置仓库变量 `DEPLOY_COMMAND`（部署目标尚未确定，见 workflow 内注释）。
+  未配置时部署步骤只打印 `::warning::`，不会失败。
+
+可选：设置仓库变量 `DOCS_REF` 指定文档仓库的分支（默认 `main`）。
+
+---
+
 ## 参与开发
 
 1. 读 [`AGENTS.md`](AGENTS.md) 与 [`docs/design-system.md`](docs/design-system.md)
 2. 从最新 `main` 建分支：`git switch -c feat/xxx`
 3. 开发后自检：`pnpm lint && pnpm build`
+   （`build` 需要 mdBook，见[「站内技术文档」](#站内技术文档handbook)；
+   只改页面、本机没有 mdBook 时可用 `pnpm build:site`）
 4. 提交并发起 Pull Request（**禁止直接 push `main`**）
 
 完整流程见 [`docs/git-workflow.md`](docs/git-workflow.md)。

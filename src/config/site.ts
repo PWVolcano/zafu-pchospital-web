@@ -40,13 +40,6 @@ export const siteConfig = {
     branch: "main",
   },
 
-  /**
-   * 技术文档站正式域名。
-   * 目前 mdBook 项目托管在 GitHub，尚未绑定独立域名；
-   * 部署后设置环境变量 NEXT_PUBLIC_DOCS_URL 即可让 /docs 页优先跳转正式站点。
-   */
-  docsSiteUrl: process.env.NEXT_PUBLIC_DOCS_URL ?? "",
-
   /** 校园网相关常用入口 */
   campusLinks: {
     auth: "http://10.152.250.2/",
