@@ -14,7 +14,7 @@ import { contactChannels, quickLinks } from "@/config/site";
 export function ContactSection() {
   return (
     <Section id="contact" labelledBy="contact-title" variant="plain" className="contact">
-      <SectionHead index="06" label="Contact" />
+      <SectionHead index="04" label="Contact" />
 
       <SectionTitle id="contact-title">找到我们</SectionTitle>
 

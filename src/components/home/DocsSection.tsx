@@ -5,6 +5,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { SectionTitle } from "@/components/ui/SectionTitle";
+import { docsPage } from "@/config/docs";
 import { docsTeaser } from "@/config/home";
 import { siteConfig } from "@/config/site";
 import { docPageUrl, docTree, flattenDocTree } from "@/lib/docs";
@@ -15,7 +16,7 @@ import { docPageUrl, docTree, flattenDocTree } from "@/lib/docs";
  * 对应设计基准的 `.docs`：左侧说明与入口按钮，右侧仓库读数面板，
  * 下方是带标题栏的目录预览面板。
  *
- * 完整入口在 /docs 页面，这里只做预览。
+ * 主入口直接进入 mdBook 的 Intro 页面，这里同时保留目录预览。
  */
 
 export function DocsSection() {
@@ -23,7 +24,7 @@ export function DocsSection() {
 
   return (
     <Section id="docs" labelledBy="docs-title">
-      <SectionHead index="05" label="Documentation" />
+      <SectionHead index="03" label="Documentation" />
 
       <div className="sec-titlebar">
         <SectionTitle id="docs-title">{docsTeaser.title}</SectionTitle>
@@ -36,11 +37,12 @@ export function DocsSection() {
           </Reveal>
 
           <Reveal className="hero__actions" index={3}>
-            <Button variant="solid" icon="book" href="/docs">
-              进入技术文档
+            <Button variant="solid" icon="book" href={docsPage.handbookAction.href}>
+              {docsPage.handbookAction.label}
             </Button>
             <Button
               variant="ghost"
+              icon="github"
               href={siteConfig.docRepo.url}
               external
               trailingIcon="arrowUpRight"

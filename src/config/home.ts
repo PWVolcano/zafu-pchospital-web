@@ -41,7 +41,7 @@ export type HeroAction = {
 export const heroActions: Record<"repair" | "docs", HeroAction> = {
   /* TODO: /repair 页面就绪后填入 "/repair" */
   repair: { label: "维修报修", href: "" },
-  docs: { label: "查看文档", href: "/docs" },
+  docs: { label: "查看文档", href: "/handbook/Intro.html" },
 };
 
 export const aboutContent = {

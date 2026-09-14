@@ -8,8 +8,11 @@
     "node": ">=20.9.0"
   },
   "scripts": {
+    "postinstall": "node tools/ensure-doc-manifest.mjs",
+    "predev": "node tools/ensure-doc-manifest.mjs",
     "dev": "next dev",
     "build": "pnpm docs:build && next build",
+    "prebuild:site": "node tools/ensure-doc-manifest.mjs",
     "build:site": "next build",
     "docs:build": "node tools/build-docs.mjs",
     "start": "next start",
