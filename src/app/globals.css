@@ -1646,7 +1646,7 @@ html[data-theme="black-yellow"] {
     grid-template-columns: 2.5rem minmax(0, 1fr) auto;
     align-items: baseline;
     gap: var(--s-3) var(--s-4);
-    padding: clamp(1.15rem, 2.4vw, 1.7rem) 0;
+    padding: clamp(1.15rem, 2.4vw, 1.7rem) var(--s-3);
     border-bottom: 1px solid var(--line-soft);
     transition: background var(--d-mid) var(--ease-quart);
   }
