@@ -82,7 +82,7 @@ export const DEFAULT_THEME_MODE: ThemeMode = "normal";
 
 /** 用户可见的模式选项，数组顺序即界面上的排列顺序。 */
 export const themeModeOptions: readonly { mode: ThemeMode; label: string }[] = [
-  { mode: "normal", label: "正常" },
+  { mode: "normal", label: "浅色" },
   { mode: "dark", label: "深色" },
 ];
 
