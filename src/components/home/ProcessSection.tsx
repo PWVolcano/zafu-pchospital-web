@@ -19,9 +19,6 @@ export function ProcessSection() {
 
       <div className="sec-titlebar">
         <SectionTitle id="process-title">一次送修会经历什么</SectionTitle>
-        <Reveal as="p" className="sec-note" index={2}>
-          流程来自《电医维修守则》。它既是给你看的，也是我们每次动手前自己对的表。
-        </Reveal>
       </div>
 
       <ol className="steps">

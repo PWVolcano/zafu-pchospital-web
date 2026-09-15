@@ -70,9 +70,6 @@ export default function JoinPage() {
         <SectionHead index={joinSections.flow.index} label={joinSections.flow.label} />
         <div className="sec-titlebar">
           <SectionTitle id="join-flow-title">{joinSections.flow.title}</SectionTitle>
-          <Reveal as="p" className="sec-note" index={2}>
-            流程用于说明大致节奏。具体时间安排以社团每学期发布的招新通知为准。
-          </Reveal>
         </div>
 
         <ol className="steps">

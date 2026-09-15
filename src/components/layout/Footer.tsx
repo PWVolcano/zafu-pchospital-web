@@ -23,8 +23,7 @@ export function Footer() {
           <a href={siteConfig.docRepo.url} target="_blank" rel="noopener noreferrer">
             {siteConfig.docRepo.name}
           </a>
-          （作者 {siteConfig.docRepo.author}，由 mdBook
-          构建）。除文档原文引用外的表述，属于站点自身的说明文字。
+          （作者 {siteConfig.docRepo.author}，由 mdBook 构建）。
         </p>
       </Container>
     </footer>
