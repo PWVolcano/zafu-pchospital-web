@@ -62,7 +62,7 @@ export const joinSignupFields: readonly JoinSignupField[] = [
     name: "qq",
     label: "QQ 号",
     placeholder: "例如 532502904",
-    hint: "5–11 位数字。QQ 号是后续成员资格匹配的凭据，请填写常用号并确保没有填错。",
+    hint: "5–11 位数字。QQ 号是后续成员资格匹配与账号登录的凭据。",
     pattern: "\\d{5,11}",
     maxLength: 11,
     type: "text",
@@ -73,7 +73,7 @@ export const joinSignupFields: readonly JoinSignupField[] = [
     name: "realName",
     label: "姓名",
     placeholder: "请填写真实姓名",
-    hint: "与校园卡一致的姓名，用于成员建档。",
+    hint: "请填写真实姓名，用于成员建档。",
     pattern: "\\S{2,20}",
     maxLength: 20,
     type: "text",
@@ -106,7 +106,7 @@ export const joinSignup = {
   asideTitle: "登记说明",
   asideRows: [
     { key: "用途", value: "仅用于招新联系与成员建档，不用于其他用途，也不对外公开。" },
-    { key: "提交之后", value: "扫码加入招新群。招新通知、面谈与跟岗安排都在群内发布。" },
+    { key: "提交之后", value: "扫码加入招新群。招新通知与面试安排都在群内发布。" },
     { key: "数据去向", value: "本页目前是静态页面，填写内容不会上传到服务器。" },
   ],
 
@@ -114,7 +114,7 @@ export const joinSignup = {
   done: {
     mark: "提交完成",
     title: "最后一步：扫码加入招新群",
-    note: "招新通知、面谈与跟岗安排都在招新群内发布。加群后请留意群公告。",
+    note: "招新通知与面试安排都在招新群内发布。加群后请留意群公告。",
     pending: "填写内容暂不上传服务器，也不代表已经完成报名。",
     pendingBadge: "待接入数据库",
     reset: "重新填写",
@@ -145,24 +145,19 @@ export const joinSignupQr = {
 
 export const joinExpectations: readonly JoinItem[] = [
   {
-    title: "愿意投入时间",
+    title: "技术基础",
     description:
-      "值班、活动与培训都需要时间。具体的最低投入要求由社团在每学期招新时确认，本页暂不写死。",
+      "我们会优先录取对维修电脑有经验者，但也同样欢迎对学习电脑维修知识有兴趣的小白。无需担心存在技术壁垒，资深成员会从基本操作开始带你进行手把手实操，以实践锻炼手法，积累经验。",
   },
   {
-    title: "不要求技术基础",
+    title: "保持热情",
     description:
-      "拆机、清灰、系统安装这些操作都会有人带。真正的要求是动手前先想清楚，拿不准就问，不要硬上。",
+      "对学习新知识保持热情——这是我们对新人唯一的要求。不懂的问题先想到自学，无法解决的再寻求帮助，永远怀有探索精神，这也同时是电脑医院的立社之本。",
   },
   {
-    title: "遵守《电医维修守则》",
+    title: "对用户负责",
     description:
-      "一人一机、先确认再动手、维修后填记录表。守则既是给用户看的，也是成员每次动手前自己对的表。",
-  },
-  {
-    title: "对用户的信息负责",
-    description:
-      "维修过程中会接触到用户的设备、数据与联系方式，仅用于完成本次维修，不得用于其他用途。",
+      "电脑维修碰到疑难杂症是家常便饭，但这不应该成为电脑医院成员中途退缩的理由。当你决定接下一位客户的委托，无论免费与否，对于你来说都是一份理应坚持到底的责任。",
   },
 ];
 
@@ -173,10 +168,10 @@ export const joinFlow: readonly JoinItem[] = [
   },
   {
     title: "扫码加入招新群",
-    description: "提交后显示招新群二维码。招新通知、面谈与跟岗安排都在群内发布。",
+    description: "提交后显示招新群二维码。招新通知、面试与跟岗安排都在群内发布。",
   },
   {
-    title: "面谈与了解",
+    title: "面试与了解",
     description: "简单聊一聊你的兴趣方向与时间安排，也让你了解社团实际在做什么。",
   },
   {

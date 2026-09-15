@@ -86,7 +86,18 @@ export default function AboutPage() {
             {aboutPage.archive.map((item) => (
               <div className="archive__row" key={item.key}>
                 <dt className="archive__key">{item.key}</dt>
-                <dd className="archive__val">{item.value}</dd>
+                {typeof item.value === "string" ? (
+                  <dd className="archive__val">{item.value}</dd>
+                ) : (
+                  /* 条目多于一行的字段（如「荣誉」）逐行渲染，行距交给 CSS */
+                  <dd className="archive__val">
+                    <span className="archive__val-list">
+                      {item.value.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </span>
+                  </dd>
+                )}
               </div>
             ))}
           </dl>

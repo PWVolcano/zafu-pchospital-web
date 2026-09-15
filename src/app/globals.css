@@ -1594,6 +1594,11 @@ html[data-theme="black-yellow"] {
     color: var(--ink-2);
     text-wrap: pretty;
   }
+  /* 多行取值（如「荣誉」）：逐行成块，行距略小于行高本身，保持同一条目内的聚合感 */
+  .archive__val-list {
+    display: grid;
+    gap: 0.3rem;
+  }
 
   /* ---------------------------------------------------- 服务范围（编辑式）
      /about 用大编号 + 大标题 + 细分割线的非对称排版，
@@ -2087,6 +2092,10 @@ html[data-theme="black-yellow"] {
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--accent);
+    /* 每行是一个独立的 grid，分类标签宽度不共享：两字标签（活动 / 自助）会让
+       标题比三字标签（校园网）靠左。给标签一个下限宽度，同一列各行的标题左边缘
+       才对得齐；超过下限的长标签仍可自然撑开。 */
+    min-width: 2.5rem;
   }
   .channel__body strong {
     display: block;
