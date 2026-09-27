@@ -55,6 +55,10 @@
 │   │   ├── join/page.tsx      # /join
 │   │   ├── docs/page.tsx      # /docs
 │   │   ├── not-found.tsx      # 404
+│   │   ├── error.tsx          # 路由级错误边界（正文替换，骨架保留）
+│   │   ├── global-error.tsx   # 根布局级兜底（自带 html/body 与全局样式）
+│   │   ├── robots.ts          # robots.txt（构建期生成，屏蔽后台/成员/接口）
+│   │   ├── sitemap.ts         # sitemap.xml（构建期生成，静态公开页 + 文档条目）
 │   │   └── icon.svg           # 站点图标
 │   │
 │   ├── components/
@@ -72,6 +76,7 @@
 │   │   ├── site.ts            # 站点信息、外链、联系方式、文档仓库、二维码
 │   │   ├── navigation.ts      # 导航菜单（新增页面只改这里）
 │   │   ├── theme.ts           # 主题注册表与「模式 → 主题」映射
+│   │   ├── errors.ts          # 错误页文案（error.tsx / global-error.tsx）
 │   │   ├── home.ts            # 首页文案与服务/流程数据
 │   │   ├── about.ts           # /about 文案
 │   │   ├── join.ts            # /join 文案
