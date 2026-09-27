@@ -277,6 +277,17 @@ export const adminShared = {
     /** 有没填完的条件时「应用」是灰的，这句话说明为什么。 */
     incomplete: "每一条都要选好列、运算符和值才能应用。",
     limit: "最多 {count} 条条件。",
+    /**
+     * 筛选区的使用说明（issue #62 后端2）。
+     *
+     * 各列表的关键字覆盖范围与匹配方式不同（多数按「包含」，审计是精确值），
+     * 各表在自己的 `filter.hint` 里拼上对应的一句；
+     * 「并且」与日期口径是共享事实，写在这里免得几处措辞漂移。
+     */
+    note: {
+      and: "多个条件之间是「并且」。",
+      dateInclusive: "日期条件含首尾两天。",
+    },
     ops: {
       eq: "等于",
       neq: "不等于",
@@ -357,6 +368,7 @@ export const adminCopy = {
       all: "全部",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `关键字对以上各项都按「包含」匹配，QQ 与手机号可以只填其中几位。${adminShared.filters.note.and}`,
     },
     table: {
       realName: "成员",
@@ -475,6 +487,7 @@ export const adminCopy = {
       all: "全部",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `关键字在维修内容、备注与成员姓名 / 昵称里按「包含」匹配。${adminShared.filters.note.and}${adminShared.filters.note.dateInclusive}`,
     },
     table: {
       repairDate: "维修日期",
@@ -657,6 +670,7 @@ export const adminCopy = {
       dateFrom: "起始日期",
       dateTo: "结束日期",
       all: "全部",
+      hint: `关键字在维修内容、备注与成员姓名 / 昵称里按「包含」匹配。${adminShared.filters.note.and}${adminShared.filters.note.dateInclusive}`,
     },
     format: {
       label: "导出格式",
@@ -734,6 +748,7 @@ export const adminCopy = {
       dateTo: "结束日期",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `关键字在评论正文、作者姓名 / 昵称 / 账号名与所属记录 ID 里按「包含」匹配。${adminShared.filters.note.and}${adminShared.filters.note.dateInclusive}`,
     },
     table: {
       body: "评论内容",
@@ -780,6 +795,7 @@ export const adminCopy = {
       all: "全部",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `码前缀不区分大小写；绑定的 QQ 与手机号要填完整号码。${adminShared.filters.note.and}`,
     },
     table: {
       prefix: "前缀",
@@ -832,6 +848,7 @@ export const adminCopy = {
       submittedTo: "提交结束日",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `报名编号与姓名按「包含」匹配；QQ 与手机号要填完整号码（QQ 5–11 位、手机号 11 位）。${adminShared.filters.note.and}${adminShared.filters.note.dateInclusive}`,
     },
     table: {
       ticketNo: "报名编号",
@@ -906,6 +923,7 @@ export const adminCopy = {
       createdTo: "结束日期",
       submit: "筛选",
       reset: "清除筛选",
+      hint: `操作者、目标与请求 ID 都要填完整值（精确匹配，不按「包含」）。${adminShared.filters.note.dateInclusive}`,
     },
     table: {
       createdAt: "时间",

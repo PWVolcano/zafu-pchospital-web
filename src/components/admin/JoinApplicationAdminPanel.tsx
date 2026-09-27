@@ -233,6 +233,8 @@ export function JoinApplicationAdminPanel() {
             {copy.filter.reset}
           </Button>
         </div>
+        {/* 查询说明：常驻一行（不是展开才有），既不会被忽略也不会让下方的表跳一下。 */}
+        <p className="admin-filters__hint">{copy.filter.hint}</p>
       </form>
 
       {state === "loading" ? (
@@ -450,7 +452,7 @@ function ApplicationDetailPanel({
             <span>{formatDateTime(detail.submittedAt)}</span>
           </div>
 
-          <div>
+          <div className="admin-section">
             <h3 className="admin-panel__title">{copy.detail.contacts}</h3>
             <p className="admin-status">
               QQ {detail.qq} · {detail.phone}
@@ -458,24 +460,24 @@ function ApplicationDetailPanel({
             <p className="admin-note">{copy.detail.contactsNote}</p>
           </div>
 
-          <div>
+          <div className="admin-section">
             <h3 className="admin-panel__title">{copy.detail.selfIntroduction}</h3>
             <p className="admin-status">{detail.selfIntroduction || adminShared.none}</p>
           </div>
 
-          <div>
+          <div className="admin-section">
             <h3 className="admin-panel__title">{copy.detail.preferredDirection}</h3>
             <p className="admin-status">{detail.preferredDirection || adminShared.none}</p>
           </div>
 
           {detail.applicantRemark ? (
-            <div>
+            <div className="admin-section">
               <h3 className="admin-panel__title">{copy.detail.applicantRemark}</h3>
               <p className="admin-status">{detail.applicantRemark}</p>
             </div>
           ) : null}
 
-          <div>
+          <div className="admin-section">
             <h3 className="admin-panel__title">{copy.detail.reviews}</h3>
             {detail.reviews.length === 0 ? (
               <p className="admin-note">{copy.detail.reviewsEmpty}</p>
@@ -539,7 +541,7 @@ function ApplicationDetailPanel({
             ) : null}
           </form>
 
-          <div>
+          <div className="admin-section">
             <h3 className="admin-panel__title">{copy.provision.title}</h3>
             <p className="admin-status">
               {copy.provision.status}：{provisionStatusLabels[currentProvision]}

@@ -205,6 +205,8 @@ export function AuditLogPanel() {
             {copy.filter.reset}
           </Button>
         </div>
+        {/* 查询说明：常驻一行（不是展开才有），既不会被忽略也不会让下方的表跳一下。 */}
+        <p className="admin-filters__hint">{copy.filter.hint}</p>
       </form>
 
       {state === "loading" ? (
@@ -276,7 +278,7 @@ export function AuditLogPanel() {
 
 function SummaryBlock({ title, value }: { title: string; value: unknown }) {
   return (
-    <div>
+    <div className="admin-section">
       <h3 className="admin-panel__title">{title}</h3>
       <pre className="admin-json">{value === null ? "—" : JSON.stringify(value, null, 2)}</pre>
     </div>

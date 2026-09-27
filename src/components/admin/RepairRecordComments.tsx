@@ -72,7 +72,7 @@ export function RepairRecordComments({
   const total = items.reduce((sum, item) => sum + 1 + item.replies.length, 0);
 
   return (
-    <div>
+    <div className="admin-section">
       <h3 className="admin-panel__title">
         {copy.recordWindow.comments.replace("{count}", String(total))}
       </h3>
