@@ -165,52 +165,56 @@ export function ExportPanel() {
           onChange={(event) => schedulePreview(event.currentTarget)}
           aria-label={copy.title}
         >
-          <div className="admin-filters__row">
-            <label className="field">
-              <span className="field__label">{copy.filter.query}</span>
-              <input className="field__input" name="query" maxLength={64} />
-            </label>
-            <label className="field">
-              <span className="field__label">{copy.filter.status}</span>
-              <select className="field__input" name="status" defaultValue="">
-                <option value="">{copy.filter.all}</option>
-                {RepairStatus.map((status) => (
-                  <option key={status} value={status}>
-                    {repairStatusLabels[status]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span className="field__label">{copy.filter.result}</span>
-              <select className="field__input" name="result" defaultValue="">
-                <option value="">{copy.filter.all}</option>
-                {RepairResult.map((result) => (
-                  <option key={result} value={result}>
-                    {repairResultLabels[result]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span className="field__label">{copy.filter.category}</span>
-              <select className="field__input" name="categoryId" defaultValue="">
-                <option value="">{copy.filter.all}</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span className="field__label">{copy.filter.dateFrom}</span>
-              <input className="field__input" type="date" name="repairDateFrom" />
-            </label>
-            <label className="field">
-              <span className="field__label">{copy.filter.dateTo}</span>
-              <input className="field__input" type="date" name="repairDateTo" />
-            </label>
+          <div className="admin-filters__group">
+            <div className="admin-filters__row">
+              <label className="field">
+                <span className="field__label">{copy.filter.query}</span>
+                <input className="field__input" name="query" maxLength={64} />
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.filter.status}</span>
+                <select className="field__input" name="status" defaultValue="">
+                  <option value="">{copy.filter.all}</option>
+                  {RepairStatus.map((status) => (
+                    <option key={status} value={status}>
+                      {repairStatusLabels[status]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.filter.result}</span>
+                <select className="field__input" name="result" defaultValue="">
+                  <option value="">{copy.filter.all}</option>
+                  {RepairResult.map((result) => (
+                    <option key={result} value={result}>
+                      {repairResultLabels[result]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.filter.category}</span>
+                <select className="field__input" name="categoryId" defaultValue="">
+                  <option value="">{copy.filter.all}</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.filter.dateFrom}</span>
+                <input className="field__input" type="date" name="repairDateFrom" />
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.filter.dateTo}</span>
+                <input className="field__input" type="date" name="repairDateTo" />
+              </label>
+            </div>
+            {/* 查询说明：常驻一行（不是展开才有），既不会被忽略也不会让下方的内容跳一下。 */}
+            <p className="admin-filters__hint">{copy.filter.hint}</p>
           </div>
 
           <fieldset className="repair-filters__checks">

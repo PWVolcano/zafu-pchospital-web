@@ -5127,6 +5127,19 @@ html[data-theme="black-yellow"] {
   .admin-filters__row > .btn {
     align-self: end;
   }
+  /* 查询说明：常驻的静态一行（不是「展开才有」的提示），因此不会让下方内容位移。
+     视觉与 `.admin-conditions__hint` 一致，两处说明读起来是同一种东西。 */
+  .admin-filters__hint {
+    margin: 0;
+    color: var(--ink-3);
+    font-size: var(--t-xs);
+  }
+  /* 控件行与说明行成组：`.admin-form` 的 gap 比这里大一档，
+     说明必须贴着控件才读得出「这是在说上面的筛选」。 */
+  .admin-filters__group {
+    display: grid;
+    gap: var(--s-3);
+  }
 
   /* ------------------------------------------------ 列级筛选（内核弹层） */
   /* 入口按钮**常驻**工具栏：不因「有没有条件」出现或消失。
@@ -5332,6 +5345,13 @@ html[data-theme="black-yellow"] {
     font-weight: 800;
     line-height: 1.2;
     color: var(--ink);
+  }
+  /* 面板 / 窗口内的一段：小标题 + 正文。段内的小标题（`.admin-panel__title`）与正文
+     （`.admin-status` / `.admin-note` / `.admin-json` / `.admin-comments`）都是
+     `margin: 0`，所以裸 `<div>` 里这两者会上下紧贴 —— 一段就是一格间距（issue #62 前端1）。 */
+  .admin-section {
+    display: grid;
+    gap: var(--s-3);
   }
 
   /* -------------------------------------------------------- 详情窗口 */

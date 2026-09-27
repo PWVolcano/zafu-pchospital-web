@@ -7,6 +7,7 @@ import {
   validateDraftFields,
   validateSubmission,
 } from "../../src/features/repairs/repair-validation";
+import { repairFieldLimits } from "../../src/config/repairs";
 import { RepairResult, RepairStatus, RepairTimelineEventType } from "../../src/types/contracts";
 import { parseRepairListStatus } from "../../src/features/repairs/repair-http";
 
@@ -30,7 +31,7 @@ test("维修状态机只接受任务书规定流转", () => {
   assert.equal(isRepairTransitionAllowed("APPROVED", "DRAFT"), false);
   assert.equal(isRepairTransitionAllowed("DRAFT", "APPROVED"), false);
 });
-test("提交完整性只要求日期、分类、结果和照片，正文与时长不再强制", () => {
+test("提交完整性要求日期、分类、正文、结果与至少一张照片", () => {
   assert.throws(
     () =>
       validateSubmission({
@@ -42,11 +43,23 @@ test("提交完整性只要求日期、分类、结果和照片，正文与时�
       }),
     (e) => e instanceof AppError && e.code === "REPAIR_SUBMISSION_INCOMPLETE",
   );
-  // 正文选填、维修时长不参与提交校验：只有日期、分类、结果和一张照片也能提交。
+  // 正文必填（issue #62 后端3）：空白等同于没填。
+  assert.throws(
+    () =>
+      validateSubmission({
+        repairDate: new Date("2026-09-15T00:00:00.000Z"),
+        categoryId: "category",
+        content: "   ",
+        result: "COMPLETED",
+        photoCount: 1,
+      }),
+    (e) => e instanceof AppError && e.code === "REPAIR_SUBMISSION_INCOMPLETE",
+  );
+  // 其余项齐了、正文有内容即可提交；维修时长不参与提交校验。
   validateSubmission({
     repairDate: new Date("2026-09-15T00:00:00.000Z"),
     categoryId: "category",
-    content: "短",
+    content: "换硅脂",
     result: "COMPLETED",
     photoCount: 1,
   });
@@ -62,6 +75,20 @@ test("提交完整性只要求日期、分类、结果和照片，正文与时�
     (e) => e instanceof AppError && e.code === "REPAIR_SUBMISSION_INCOMPLETE",
   );
   assert.throws(() => validateDraftFields({ durationMinutes: 10081 }), AppError);
+});
+
+test("维修日期上下限在保存草稿时就生效，而不是等到提交", () => {
+  const future = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  for (const repairDate of ["2019-12-31", future]) {
+    assert.throws(
+      () => validateDraftFields({ repairDate }),
+      (e) => e instanceof AppError && e.code === "VALIDATION_FAILED",
+      `${repairDate} 应当被拒绝`,
+    );
+  }
+  // 边界：下限当天与今天都合法。
+  validateDraftFields({ repairDate: repairFieldLimits.repairDateMin });
+  validateDraftFields({ repairDate: new Date().toISOString().slice(0, 10) });
 });
 test("图片魔数拒绝伪造 MIME 并识别 JPEG PNG WebP", () => {
   assert.equal(detectImageType(Uint8Array.from([0xff, 0xd8, 0xff, 0x00])), "image/jpeg");

@@ -8,7 +8,10 @@ import {
   canEditIssueType,
   deriveRepairActivityStatus,
   remainingCapacity,
+  RepairActivityIssueType,
+  repairActivityIssueTypeLabels,
 } from "../../src/features/repair-activities/repair-activity-validation";
+import { repairActivitiesPage } from "../../src/config/repair-activities";
 import { AppError } from "../../src/lib/api/errors";
 
 const base = {
@@ -203,8 +206,28 @@ test("软删除有效报名后，活动窗口内 FULL 恢复为 OPEN；成员撤
 
 test("管理报名 PATCH 使用同一 issueType 白名单", () => {
   assert.doesNotThrow(() => assertValidIssueType("CLEAN_ONLY"));
+  assert.doesNotThrow(() => assertValidIssueType("SOFTWARE_SYSTEM"));
   assert.throws(
     () => assertValidIssueType("INVALID"),
     (error) => error instanceof AppError && error.code === "VALIDATION_FAILED",
+  );
+});
+
+test("报名页给出的每个故障类型都被服务端接受，且两处文案一致", () => {
+  const options = repairActivitiesPage.issueTypes;
+  // 前端选项与服务端白名单/标签是两份数据，很容易只改一处 —— issue #62 要求新增
+  // 「软件 / 系统问题」时，两边必须同步。
+  for (const option of options) {
+    assert.equal(assertValidIssueType(option.value), option.value);
+    assert.equal(
+      repairActivityIssueTypeLabels[option.value as RepairActivityIssueType],
+      option.label,
+      `故障类型 ${option.value} 的文案在 config 与 validation 里不一致`,
+    );
+  }
+  assert.deepEqual(
+    options.map((option) => option.value).sort(),
+    [...RepairActivityIssueType].sort(),
+    "报名页的故障类型选项与服务端枚举必须逐一对应",
   );
 });

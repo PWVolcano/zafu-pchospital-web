@@ -139,7 +139,20 @@ PR 中记录影响范围。不强制单独评审；但若影响其他模块，�
 - `PATCH /api/v1/admin/repair-categories/:id`
 - `POST /api/v1/admin/repair-categories/:id/deactivate`
 
-创建草稿、提交和审核使用 `Idempotency-Key`。更新草稿携带 `version`；过期版本返回
+幂等键的传递方式按端点分两类，两侧不互通：
+
+| 传递方式                     | 端点                                                                                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Idempotency-Key` **请求头** | 成员端写接口：`POST /api/v1/repairs`、`POST /api/v1/repairs/:id/submit`                                                                                            |
+| 请求体字段 `idempotencyKey`  | 管理端与后台写接口：`POST /api/v1/admin/repairs/:id/reviews`、`.../batch-reviews`、`admin/members`、`join-applications/:id/reviews`、`member-registrations/invite` |
+
+单条审核的键上限 128 位；批次键按 `${批次键}:${recordId}` 给每条记录派生一个键，`recordId` 是
+`Char(36)`，所以批次键上限是 `128 − 1 − 36 = 91` 位。
+
+> 单条审核曾读**头**而界面发**体**，两边对不上导致管理端审核必然 400（issue #62）。
+> 现在两类端点各按上表取值，`tests/integration/m6-admin.test.ts` 从真实路由打进一次以防回归。
+
+更新草稿携带 `version`；过期版本返回
 `REPAIR_VERSION_CONFLICT`。列表支持分页、成员、分类、状态、结果、日期、疑难、典型和关键词
 筛选；普通成员只能看到本人全部状态与他人的 `APPROVED` 记录。照片内容接口要求有效 Session，
 并返回私有缓存、`nosniff`、正确 MIME 与长度。
@@ -360,3 +373,16 @@ DELETE /api/v1/member/notifications/:id
 - 报名列表的 `submittedFrom` / `submittedTo` 改为按上海自然日解释且**结束日包含全天**：
   原先的 `lte: new Date("2026-09-22")` 会把当天 08:00 之后的报名全部排除，
   界面上表现为「筛同一天得到 0 条」。
+
+## 活动报名免责声明（issue #62）
+
+- `POST /api/v1/repair-activities/[id]/registrations` 的 body 增加 `consentAccepted`：
+  必须**恰好为 `true`**（缺省、`"true"`、`1` 都算没同意），否则 400
+  `ACTIVITY_CONSENT_REQUIRED`。这是唯一的报名入口，因此界面弹层之外没有第二条路可走。
+- 同意后写入 `repair_activity_registrations.consent_version` + `consent_accepted_at`，
+  版本值来自 `src/config/repair-activities.ts` 的 `repairActivityConsentVersion`；
+  **改声明正文必须同时改这个版本号**，已签署的旧记录保留当时那一版。
+- 两列均可空：迁移之前的历史报名没有签署动作，不用默认值伪造同意记录。
+- 校验顺序是「先字段、后同意」：手机号填错的人先看到格式问题，而不是先被要求同意声明。
+
+新增错误码：`ACTIVITY_CONSENT_REQUIRED`(400)。

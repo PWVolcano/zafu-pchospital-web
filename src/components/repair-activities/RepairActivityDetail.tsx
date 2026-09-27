@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { formatShanghaiDateTime } from "@/components/repair-activities/activity-format";
 import { repairActivityStatusBadgeClass } from "@/components/repair-activities/activity-status-badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { repairActivitiesPage } from "@/config/repair-activities";
 import {
   canAcceptNewRegistration,
@@ -30,6 +31,13 @@ export function RepairActivityDetail({ activityId }: Props) {
   const [busy, setBusy] = useState(false);
   const [lookup, setLookup] = useState<RegistrationLookupView | null>(null);
   const [lookupPhone, setLookupPhone] = useState("");
+  /** 已填好、等报名者在免责声明弹层里点「我已阅读并同意」的那一份表单内容。 */
+  const [pendingSignup, setPendingSignup] = useState<{
+    name: string;
+    phone: string;
+    issueType: string;
+  } | null>(null);
+  const signupFormRef = useRef<HTMLFormElement>(null);
 
   const load = useCallback(async () => {
     setProblem("");
@@ -62,34 +70,47 @@ export function RepairActivityDetail({ activityId }: Props) {
     void load();
   }, [load]);
 
-  async function signup(event: FormEvent<HTMLFormElement>) {
+  /** 填好表单 → 先弹免责声明，不直接提交。 */
+  function requestSignup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
     setProblem("");
     setNotice("");
     const data = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
+    setPendingSignup({
+      name: data.name ?? "",
+      phone: data.phone ?? "",
+      issueType: data.issueType ?? "",
+    });
+  }
+
+  /** 弹层里点过「我已阅读并同意」之后才真正提交。 */
+  async function confirmSignup() {
+    if (!pendingSignup) return;
+    setBusy(true);
+    setProblem("");
+    setNotice("");
     try {
       const response = await fetch(`/api/v1/repair-activities/${activityId}/registrations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name ?? "",
-          phone: data.phone ?? "",
-          issueType: data.issueType ?? "",
-        }),
+        body: JSON.stringify({ ...pendingSignup, consentAccepted: true }),
       });
       const json = (await response.json()) as {
         success: boolean;
         error?: { message?: string };
       };
       if (!json.success) {
+        // 失败要让报名者看得见原因，而错误提示在弹层后面 —— 先关弹层再报错。
+        setPendingSignup(null);
         setProblem(json.error?.message ?? "报名失败");
       } else {
+        setPendingSignup(null);
         setNotice(copy.signupSuccess);
-        event.currentTarget.reset();
+        signupFormRef.current?.reset();
         await load();
       }
     } catch {
+      setPendingSignup(null);
       setProblem("网络异常，请稍后重试");
     } finally {
       setBusy(false);
@@ -252,7 +273,12 @@ export function RepairActivityDetail({ activityId }: Props) {
         <Card className="admin-panel activity-detail__signup">
           <h2 className="admin-panel__title">{copy.signupTitle}</h2>
           {!open ? <p className="muted">{signupDisabledReason}</p> : null}
-          <form className="admin-form" onSubmit={signup} aria-label={copy.signupTitle}>
+          <form
+            className="admin-form"
+            ref={signupFormRef}
+            onSubmit={requestSignup}
+            aria-label={copy.signupTitle}
+          >
             <div className="admin-form__grid">
               <label className="field">
                 <span className="field__label">{copy.name}</span>
@@ -362,6 +388,28 @@ export function RepairActivityDetail({ activityId }: Props) {
           ) : null}
         </Card>
       </div>
+
+      {/* 免责声明（issue #62 前端3）：点「提交报名」先弹这里，不同意就提交不了。
+          服务端同样强制，绕开这个弹层直接打接口会拿到 400。 */}
+      {pendingSignup ? (
+        <ConfirmDialog
+          title={copy.consent.title}
+          confirmLabel={copy.consent.agree}
+          cancelLabel={copy.consent.cancel}
+          busy={busy}
+          onConfirm={() => void confirmSignup()}
+          onClose={() => setPendingSignup(null)}
+        >
+          <div className="admin-section">
+            <p className="muted">{copy.consent.subtitle}</p>
+            <ol className="admin-plain-list">
+              {copy.consent.clauses.map((clause) => (
+                <li key={clause}>{clause}</li>
+              ))}
+            </ol>
+          </div>
+        </ConfirmDialog>
+      ) : null}
     </div>
   );
 }

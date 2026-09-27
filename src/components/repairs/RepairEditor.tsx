@@ -4,7 +4,13 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { defaultRepairResult, repairResultLabels } from "@/config/repairs";
+import {
+  defaultRepairResult,
+  repairEditorCopy,
+  repairFieldLimits,
+  repairResultLabels,
+} from "@/config/repairs";
+import { shanghaiToday } from "@/lib/shanghai-date";
 import type { RepairCategoryView, RepairDetailView } from "@/types/contracts";
 
 export function RepairEditor({ recordId }: { recordId: string }) {
@@ -189,16 +195,25 @@ export function RepairEditor({ recordId }: { recordId: string }) {
         >
           <div className="gap-s-4 grid md:grid-cols-2">
             <label className="field">
-              <span className="field__label">维修日期</span>
+              <span className="field__label">
+                维修日期
+                <span className="field__req">{repairEditorCopy.requiredMark}</span>
+              </span>
               <input
                 className="field__input"
                 type="date"
                 value={record.repairDate ?? ""}
+                min={repairFieldLimits.repairDateMin}
+                max={shanghaiToday()}
                 onChange={(e) => field("repairDate", e.target.value || null)}
               />
+              <span className="field__hint">{repairEditorCopy.dateHint}</span>
             </label>
             <label className="field">
-              <span className="field__label">故障分类</span>
+              <span className="field__label">
+                故障分类
+                <span className="field__req">{repairEditorCopy.requiredMark}</span>
+              </span>
               <select
                 className="field__input"
                 value={record.category?.id ?? ""}
@@ -216,18 +231,22 @@ export function RepairEditor({ recordId }: { recordId: string }) {
             </label>
           </div>
           <label className="field">
-            <span className="field__label">维修内容</span>
+            <span className="field__label">
+              维修内容
+              <span className="field__req">{repairEditorCopy.requiredMark}</span>
+            </span>
             <textarea
               className="field__input min-h-40"
-              maxLength={10000}
+              maxLength={repairFieldLimits.contentMaxLength}
               value={record.content ?? ""}
               onChange={(e) => field("content", e.target.value)}
               aria-describedby="repair-content-hint"
             />
             <span className="field__hint" id="repair-content-hint">
-              选填，最多 10000 字。
+              {repairEditorCopy.contentHint}
             </span>
           </label>
+          <p className="field__hint">{repairEditorCopy.requiredNote}</p>
           <p className="field__hint">
             维修结果默认为「{repairResultLabels[defaultRepairResult]}」，保存与提交都会按此记录。
           </p>

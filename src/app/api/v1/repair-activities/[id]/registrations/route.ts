@@ -36,6 +36,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         name: String(body.name ?? ""),
         phone: phoneRaw,
         issueType: body.issueType,
+        // 免责声明同意标记（issue #62 前端3）：只认布尔 true，缺失或其它值都算没同意。
+        consentAccepted: body.consentAccepted === true,
       },
       context,
     );

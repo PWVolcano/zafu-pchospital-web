@@ -1,3 +1,4 @@
+import { repairFieldLimits } from "@/config/repairs";
 import { AppError } from "@/lib/api/errors";
 import type { RepairDraftFields, RepairResult } from "@/types/contracts";
 
@@ -14,18 +15,27 @@ export function normalizeDraftFields(input: RepairDraftFields): RepairDraftField
 
 export function validateDraftFields(input: RepairDraftFields): void {
   const errors: Record<string, string[]> = {};
-  if (input.repairDate != null && !isDate(input.repairDate))
+  if (input.repairDate != null && !isDate(input.repairDate)) {
     errors.repairDate = ["维修日期格式无效"];
+  } else if (input.repairDate) {
+    // 日期范围在草稿阶段就拦：等到提交才报错，用户早就离开了这一页（issue #62 后端3）。
+    if (input.repairDate < repairFieldLimits.repairDateMin)
+      errors.repairDate = [`维修日期不得早于 ${repairFieldLimits.repairDateMin}`];
+    else if (input.repairDate > currentShanghaiDate()) errors.repairDate = ["维修日期不能晚于今天"];
+  }
   if (
     input.durationMinutes != null &&
     (!Number.isInteger(input.durationMinutes) ||
-      input.durationMinutes < 1 ||
-      input.durationMinutes > 10080)
+      input.durationMinutes < repairFieldLimits.durationMinutesMin ||
+      input.durationMinutes > repairFieldLimits.durationMinutesMax)
   )
-    errors.durationMinutes = ["维修时长须为 1–10080 分钟"];
-  if (input.content != null && input.content.length > 10000)
-    errors.content = ["维修内容不能超过 10000 字"];
-  if (input.remark != null && input.remark.length > 2000) errors.remark = ["备注不能超过 2000 字"];
+    errors.durationMinutes = [
+      `维修时长须为 ${repairFieldLimits.durationMinutesMin}–${repairFieldLimits.durationMinutesMax} 分钟`,
+    ];
+  if (input.content != null && input.content.length > repairFieldLimits.contentMaxLength)
+    errors.content = [`维修内容不能超过 ${repairFieldLimits.contentMaxLength} 字`];
+  if (input.remark != null && input.remark.length > repairFieldLimits.remarkMaxLength)
+    errors.remark = [`备注不能超过 ${repairFieldLimits.remarkMaxLength} 字`];
   if (input.result != null && !isRepairResult(input.result)) errors.result = ["维修结果无效"];
   if (Object.keys(errors).length)
     throw new AppError("VALIDATION_FAILED", "维修记录字段无效", { fieldErrors: errors });
@@ -40,10 +50,17 @@ export function validateSubmission(record: {
 }): void {
   const errors: Record<string, string[]> = {};
   if (!record.repairDate) errors.repairDate = ["请填写维修日期"];
-  else if (formatShanghaiDate(record.repairDate) > currentShanghaiDate())
-    errors.repairDate = ["维修日期不能晚于今天"];
+  else {
+    const repairDate = formatShanghaiDate(record.repairDate);
+    if (repairDate > currentShanghaiDate()) errors.repairDate = ["维修日期不能晚于今天"];
+    else if (repairDate < repairFieldLimits.repairDateMin)
+      errors.repairDate = [`维修日期不得早于 ${repairFieldLimits.repairDateMin}`];
+  }
   if (!record.categoryId) errors.categoryId = ["请选择故障分类"];
-  if ((record.content?.trim().length ?? 0) > 10000) errors.content = ["维修内容不能超过 10000 字"];
+  const content = record.content?.trim() ?? "";
+  if (!content) errors.content = ["请填写维修内容"];
+  else if (content.length > repairFieldLimits.contentMaxLength)
+    errors.content = [`维修内容不能超过 ${repairFieldLimits.contentMaxLength} 字`];
   if (!isRepairResult(record.result)) errors.result = ["维修结果缺失"];
   if (record.photoCount < 1) errors.photos = ["至少上传一张维修照片"];
   if (Object.keys(errors).length)

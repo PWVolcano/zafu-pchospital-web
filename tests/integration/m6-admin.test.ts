@@ -20,6 +20,7 @@ import { permissionsForRoles } from "../../src/lib/auth/permissions";
 import { disconnectDb, getDb } from "../../src/lib/db/client";
 import type { AuthorizedActor, MemberListEntry } from "../../src/types/contracts";
 import { integrationTestsEnabled } from "./db-guard";
+import { callRoute, sessionCookie } from "./http-harness";
 
 /* 集成测试的统一闸门：指向非测试库时**在加载阶段就抛错**（`db-guard.ts` 里写了两次
    实际事故）。未开启时返回 false，各文件照常走 test.skip。 */
@@ -648,6 +649,88 @@ dbTest("批量退回必须在入口就带原因，逐条结果可用于界面展
   assert.deepEqual(result.succeeded, [record.id]);
   const actions = await auditActions(record.id);
   assert.equal(actions.includes("repair.rejected"), true);
+});
+
+/* ------------------------------------------------- 审核接口的幂等键位置 */
+
+dbTest(
+  "单条审核从**请求体**取 idempotencyKey（issue #62：点审核必报「Idempotency-Key 无效」）",
+  async () => {
+    const created = await createMember("审核幂等键");
+    const pending = await pendingRepair(created.owner);
+    const cookie = await sessionCookie(ADMIN_USER_ID);
+    const { POST } = await import("../../src/app/api/v1/admin/repairs/[id]/reviews/route");
+
+    // 路由此前读 `Idempotency-Key` **头**，而管理端界面（RepairAdminActions）与管理端其余
+    // 写接口一律把键放在**请求体**，两边对不上 → 线上审核必然 400。服务层用例直接调
+    // service，跳过了参数解析这一层，所以一直没被发现。这里从真实路由打进一次。
+    const key = randomUUID();
+    const approved = await callRoute(
+      POST,
+      `http://localhost/api/v1/admin/repairs/${pending.id}/reviews`,
+      {
+        method: "POST",
+        headers: { cookie },
+        params: { id: pending.id },
+        body: { decision: "APPROVED", idempotencyKey: key },
+      },
+    );
+    assert.equal(approved.status, 200, JSON.stringify(approved.json));
+    assert.equal((approved.json.data as { status: string }).status, "APPROVED");
+
+    // 同键重放走幂等分支：仍然 200，但不能多写一条审核记录。
+    const replay = await callRoute(
+      POST,
+      `http://localhost/api/v1/admin/repairs/${pending.id}/reviews`,
+      {
+        method: "POST",
+        headers: { cookie },
+        params: { id: pending.id },
+        body: { decision: "APPROVED", idempotencyKey: key },
+      },
+    );
+    assert.equal(replay.status, 200, JSON.stringify(replay.json));
+    assert.equal(await getDb().repairReview.count({ where: { idempotencyKey: key } }), 1);
+
+    const missing = await callRoute(
+      POST,
+      `http://localhost/api/v1/admin/repairs/${pending.id}/reviews`,
+      {
+        method: "POST",
+        headers: { cookie },
+        params: { id: pending.id },
+        body: { decision: "APPROVED" },
+      },
+    );
+    assert.equal(missing.status, 400);
+    assert.equal((missing.json.error as { code: string }).code, "VALIDATION_FAILED");
+  },
+);
+
+dbTest("批次幂等键的上限按派生键算：单条那一关的上限是 128，批次必须更小", async () => {
+  const created = await createMember("批次幂等键");
+  const record = await pendingRepair(created.owner);
+  // 每条记录派生 `${批次键}:${recordId}`，recordId 是 Char(36)；批次键 92 位时派生值 129 位，
+  // 会在单条审核那里被判「Idempotency-Key 无效」，界面上表现为整批失败。
+  const tooLong = "b".repeat(92);
+  await expectCode(
+    () =>
+      repairAdminService.batchReview(
+        { recordIds: [record.id], decision: "APPROVED", idempotencyKey: tooLong },
+        ADMIN_ACTOR,
+      ),
+    "VALIDATION_FAILED",
+  );
+  const atLimit = "a".repeat(91);
+  const result = await repairAdminService.batchReview(
+    { recordIds: [record.id], decision: "APPROVED", idempotencyKey: atLimit },
+    ADMIN_ACTOR,
+  );
+  assert.deepEqual(
+    result.succeeded,
+    [record.id],
+    `91 位批次键的派生键应通过：${JSON.stringify(result.failed)}`,
+  );
 });
 
 dbTest("软删除违规记录：从管理端列表与正式统计中同时消失", async () => {

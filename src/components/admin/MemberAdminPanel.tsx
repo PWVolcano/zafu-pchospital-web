@@ -379,6 +379,8 @@ export function MemberAdminPanel() {
             {copy.filter.reset}
           </Button>
         </div>
+        {/* 查询说明：常驻一行（不是展开才有），既不会被忽略也不会让下方的表跳一下。 */}
+        <p className="admin-filters__hint">{copy.filter.hint}</p>
       </form>
 
       {state === "loading" ? (

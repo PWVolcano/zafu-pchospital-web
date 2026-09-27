@@ -1,4 +1,12 @@
 /**
+ * 免责声明版本（issue #62 前端3）。
+ *
+ * 改动 `detail.consent.clauses` 之后**必须**同时改这个值：报名记录里存的是当时那一版，
+ * 用于日后核对「这位同学同意的是哪一版文本」。格式为日期，便于排序与人工核对。
+ */
+export const repairActivityConsentVersion = "2026-09-27";
+
+/**
  * 公开维修活动页文案（M1）。
  */
 export const repairActivitiesPage = {
@@ -34,10 +42,25 @@ export const repairActivitiesPage = {
     closedDisabled: "报名已截止",
     fullDisabled: "名额已满",
     notEditable: "当前状态不可修改故障类型（可能已签到或已接待）。",
+    /** 报名前的免责声明：必须点「我已阅读并同意」才能提交，服务端同样强制。 */
+    consent: {
+      title: "报名须知与免责声明",
+      subtitle: "提交报名前请阅读以下内容；不同意则无法提交。",
+      clauses: [
+        "报名需填写真实姓名与常用手机号：姓名用于现场核对，手机号用于查询报名与接收活动变更通知。",
+        "本活动由社团成员提供免费志愿服务，不收取费用；设备能否修复、需要多长时间，以现场检查结果为准。",
+        "送修前请自行备份重要数据。因设备自身老化、数据未备份等非服务方原因造成的损失，社团不承担责任。",
+        "配件与耗材按现场情况与客户协商解决，社团不承诺提供配件。",
+        "报名信息只用于本场活动的组织与到场核对，不对外公开。",
+      ],
+      agree: "我已阅读并同意",
+      cancel: "取消",
+    },
   },
   issueTypes: [
     { value: "CLEAN_PASTE", label: "清灰换硅脂" },
     { value: "CLEAN_ONLY", label: "清灰" },
+    { value: "SOFTWARE_SYSTEM", label: "软件 / 系统问题" },
     { value: "OTHER", label: "其他故障" },
   ],
 } as const;

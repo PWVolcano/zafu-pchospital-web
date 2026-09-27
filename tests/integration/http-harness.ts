@@ -30,11 +30,20 @@ export function sameOriginHeaders(): Record<string, string> {
  *
  * 写接口会走 `assertSameOrigin()`，见 `sameOriginHeaders()`。`host` / `x-forwarded-host`
  * 保留只为贴近真实请求，校验本身已经不看它们。
+ *
+ * `Params` 从 `handler` 的第二个参数反推：`/api/v1/repairs/[id]/...` 这类动态段路由把
+ * `params` 声明为**必填**，若这里写成可选，传入的处理器会因参数逆变而不满足签名。
+ * 无参数路由只声明一个形参，`Params` 取默认值即可，多传一个实参不影响运行。
  */
-export async function callRoute(
-  handler: (request: Request, context?: never) => Promise<Response>,
+export async function callRoute<Params extends Record<string, string> = Record<string, string>>(
+  handler: (request: Request, context: { params: Promise<Params> }) => Promise<Response>,
   url: string,
-  init: { method?: string; body?: unknown; headers?: Record<string, string> } = {},
+  init: {
+    method?: string;
+    body?: unknown;
+    headers?: Record<string, string>;
+    params?: Params;
+  } = {},
 ): Promise<{ status: number; json: Record<string, unknown> }> {
   const parsed = new URL(url);
   const request = new Request(url, {
@@ -48,7 +57,9 @@ export async function callRoute(
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
   });
-  const response = await handler(request);
+  const response = await handler(request, {
+    params: Promise.resolve(init.params ?? ({} as Params)),
+  });
   return { status: response.status, json: (await response.json()) as Record<string, unknown> };
 }
 
@@ -77,9 +88,20 @@ export async function sessionCookie(userId: string, roleCode: RoleCode = "ADMIN"
       activeKey: `${userId}:${role.id}`,
     },
   });
-  await db.passwordCredential.updateMany({
+  await db.passwordCredential.upsert({
     where: { userId },
-    data: { mustChangePassword: false, passwordChangedAt: now },
+    // 集成夹具里的管理员常常是 `db.user.create` 直接建的，**没有**口令凭据那一行；
+    // 用 updateMany 关掉「必须改密」对不存在的行等于什么都没做，路由会返回
+    // `PASSWORD_CHANGE_REQUIRED`，测到的就不是业务分支。
+    update: { mustChangePassword: false, passwordChangedAt: now },
+    create: {
+      userId,
+      passwordHash: "integration-placeholder-hash",
+      mustChangePassword: false,
+      passwordChangedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    },
   });
   const token = randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");
   await db.authSession.create({
