@@ -554,6 +554,9 @@ model RepairActivityRegistration {
   phoneLast4              String         @map("phone_last4") @db.VarChar(4)
   issueType               String         @map("issue_type") @db.VarChar(32)
   status                  String         @db.VarChar(32)
+  /// 报名时同意的免责声明版本与时间（issue #62 前端3）。历史报名没有签署动作，因此可空。
+  consentVersion          String?        @map("consent_version") @db.VarChar(16)
+  consentAcceptedAt       DateTime?      @map("consent_accepted_at") @db.DateTime(3)
   checkedInAt             DateTime?      @map("checked_in_at") @db.DateTime(3)
   servedAt                DateTime?      @map("served_at") @db.DateTime(3)
   servedByMemberProfileId String?        @map("served_by_member_profile_id") @db.Char(36)

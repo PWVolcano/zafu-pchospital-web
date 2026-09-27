@@ -64,8 +64,10 @@
 | `name` | 姓名 VarChar(40) |
 | `phone` | **规范化后** 11 位手机号 |
 | `phoneLast4` | 冗余后四位，便于查询索引（可选；也可用 phone 等值查） |
-| `issueType` | 枚举：`CLEAN_PASTE` \| `CLEAN_ONLY` \| `OTHER`（清灰换硅脂 / 清灰 / 其他故障） |
+| `issueType` | 枚举：`CLEAN_PASTE` \| `CLEAN_ONLY` \| `SOFTWARE_SYSTEM` \| `OTHER`（清灰换硅脂 / 清灰 / 软件 / 系统问题 / 其他故障） |
 | `status` | `REGISTERED` \| `CHECKED_IN` \| `SERVED` |
+| `consentVersion` | 报名时同意的免责声明版本（`repairActivityConsentVersion`），nullable —— 历史报名没有签署动作（issue #62 前端3） |
+| `consentAcceptedAt` | 同意时间，nullable，与 `consentVersion` 同时写入 |
 | `checkedInAt` | 签到入队时间，nullable |
 | `servedAt` | 接待完成时间，nullable |
 | `servedByMemberProfileId` | 接待成员，nullable |
@@ -121,6 +123,7 @@ CHECKED_IN ─撤回→ REGISTERED（清空 checkedInAt；可再签到）
 | `issueType` | `categoryId` |
 |---|---|
 | `CLEAN_PASTE` / `CLEAN_ONLY` | seed 已有 `COOLING_CLEANING`（「散热 / 清灰」） |
+| `SOFTWARE_SYSTEM` | seed 已有 `SYSTEM`（「系统问题」）—— issue #62 新增的报名选项 |
 | `OTHER` | **新建**分类 `OTHER_FAULT` / 「其他故障」（seed + migration；勿复用笼统的 `OTHER`「其他」，避免语义漂移） |
 
 落单字段建议：
@@ -149,7 +152,7 @@ CHECKED_IN ─撤回→ REGISTERED（清空 checkedInAt；可再签到）
 |---|---|---|
 | GET | `/api/v1/repair-activities` | 列表，按 `activityAt` 升序；含派生 status、剩余名额；电话不出现 |
 | GET | `/api/v1/repair-activities/[id]` | 详情；**ENDED 返回 404 或 410 + 文案**（列表不可点，直链也不可进） |
-| POST | `/api/v1/repair-activities/[id]/registrations` | 报名；body: name, phone, issueType |
+| POST | `/api/v1/repair-activities/[id]/registrations` | 报名；body: name, phone, issueType, consentAccepted（必须为 `true`，否则 400 `ACTIVITY_CONSENT_REQUIRED`） |
 | POST | `/api/v1/repair-activities/[id]/registrations/lookup` | 查询；body: phone → 返回可改类型所需字段（脱敏） |
 | PATCH | `/api/v1/repair-activities/[id]/registrations/[regId]` | 仅 issueType；需 phone 校验或 lookup 签发的短期 token（**推荐：lookup 返回 `editToken`（HMAC，10min），PATCH 带 token**，避免只靠 regId 枚举） |
 

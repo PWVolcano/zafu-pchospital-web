@@ -4,7 +4,12 @@ import { AppError } from "@/lib/api/errors";
 export const RepairActivityStatus = ["UPCOMING", "OPEN", "FULL", "CLOSED", "ENDED"] as const;
 export type RepairActivityStatus = (typeof RepairActivityStatus)[number];
 
-export const RepairActivityIssueType = ["CLEAN_PASTE", "CLEAN_ONLY", "OTHER"] as const;
+export const RepairActivityIssueType = [
+  "CLEAN_PASTE",
+  "CLEAN_ONLY",
+  "SOFTWARE_SYSTEM",
+  "OTHER",
+] as const;
 export type RepairActivityIssueType = (typeof RepairActivityIssueType)[number];
 
 /** Capacity lower bound shared by server validation and admin form HTML min. */
@@ -40,6 +45,7 @@ export const repairActivityStatusShortLabels: Record<RepairActivityStatus, strin
 export const repairActivityIssueTypeLabels: Record<RepairActivityIssueType, string> = {
   CLEAN_PASTE: "清灰换硅脂",
   CLEAN_ONLY: "清灰",
+  SOFTWARE_SYSTEM: "软件 / 系统问题",
   OTHER: "其他故障",
 };
 
@@ -169,6 +175,7 @@ export function remainingCapacity(capacity: number, effectiveCount: number): num
 export const ISSUE_TYPE_CATEGORY_CODE: Record<RepairActivityIssueType, string> = {
   CLEAN_PASTE: "COOLING_CLEANING",
   CLEAN_ONLY: "COOLING_CLEANING",
+  SOFTWARE_SYSTEM: "SYSTEM",
   OTHER: "OTHER_FAULT",
 };
 

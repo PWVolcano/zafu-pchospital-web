@@ -35,6 +35,7 @@ test("接待矩阵：仅 CHECKED_IN 可接待", () => {
 test("故障类型 → 分类 code 映射", () => {
   assert.equal(mapIssueTypeToCategoryCode("CLEAN_PASTE"), "COOLING_CLEANING");
   assert.equal(mapIssueTypeToCategoryCode("CLEAN_ONLY"), "COOLING_CLEANING");
+  assert.equal(mapIssueTypeToCategoryCode("SOFTWARE_SYSTEM"), "SYSTEM");
   assert.equal(mapIssueTypeToCategoryCode("OTHER"), "OTHER_FAULT");
 });
 

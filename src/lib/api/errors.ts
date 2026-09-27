@@ -83,6 +83,7 @@ export const ApiErrorCode = [
   "ACTIVITY_ATTENDANCE_REQUIRED",
   "ACTIVITY_REGISTRATION_STATE_INVALID",
   "ACTIVITY_CATEGORY_MISSING",
+  "ACTIVITY_CONSENT_REQUIRED",
   "INTERNAL_ERROR",
 ] as const;
 
@@ -176,6 +177,8 @@ const defaultStatus: Record<ApiErrorCode, number> = {
   ACTIVITY_ATTENDANCE_REQUIRED: 403,
   ACTIVITY_REGISTRATION_STATE_INVALID: 409,
   ACTIVITY_CATEGORY_MISSING: 500,
+  // 400 而不是 409：请求本身缺了「已同意」这一项，不是系统状态不允许。
+  ACTIVITY_CONSENT_REQUIRED: 400,
   INTERNAL_ERROR: 500,
 };
 export class AppError extends Error {

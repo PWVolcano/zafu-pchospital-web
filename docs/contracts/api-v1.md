@@ -373,3 +373,16 @@ DELETE /api/v1/member/notifications/:id
 - 报名列表的 `submittedFrom` / `submittedTo` 改为按上海自然日解释且**结束日包含全天**：
   原先的 `lte: new Date("2026-09-22")` 会把当天 08:00 之后的报名全部排除，
   界面上表现为「筛同一天得到 0 条」。
+
+## 活动报名免责声明（issue #62）
+
+- `POST /api/v1/repair-activities/[id]/registrations` 的 body 增加 `consentAccepted`：
+  必须**恰好为 `true`**（缺省、`"true"`、`1` 都算没同意），否则 400
+  `ACTIVITY_CONSENT_REQUIRED`。这是唯一的报名入口，因此界面弹层之外没有第二条路可走。
+- 同意后写入 `repair_activity_registrations.consent_version` + `consent_accepted_at`，
+  版本值来自 `src/config/repair-activities.ts` 的 `repairActivityConsentVersion`；
+  **改声明正文必须同时改这个版本号**，已签署的旧记录保留当时那一版。
+- 两列均可空：迁移之前的历史报名没有签署动作，不用默认值伪造同意记录。
+- 校验顺序是「先字段、后同意」：手机号填错的人先看到格式问题，而不是先被要求同意声明。
+
+新增错误码：`ACTIVITY_CONSENT_REQUIRED`(400)。

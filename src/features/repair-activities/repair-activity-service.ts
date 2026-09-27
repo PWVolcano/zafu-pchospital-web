@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { repairActivityConsentVersion } from "@/config/repair-activities";
 import {
   issueRegistrationEditToken,
   verifyRegistrationEditToken,
@@ -495,12 +496,19 @@ export const repairActivityService = {
 
   async register(
     activityId: string,
-    input: { name: string; phone: string; issueType: unknown },
+    input: { name: string; phone: string; issueType: unknown; consentAccepted?: boolean },
     context: PublicRequestContext,
   ): Promise<RegistrationPublicView> {
     const name = assertValidRegistrantName(input.name);
     const phone = normalizePhone(input.phone);
     const issueType = assertValidIssueType(input.issueType);
+    // 免责声明必须由报名者本人点过（issue #62 前端3）。
+    // 前端弹层只是「把这件事问清楚」，真正拦住绕过弹层直接打接口的是这一句 ——
+    // 报名接口是公开的，只在界面上拦等于没拦。
+    // 顺序：先报字段问题、再报缺同意，否则一个手机号填错的人会先看到「请先同意免责声明」。
+    if (input.consentAccepted !== true) {
+      throw new AppError("ACTIVITY_CONSENT_REQUIRED", "请先阅读并同意报名须知与免责声明");
+    }
 
     return inSerializableTransaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM repair_activities WHERE id = ${activityId} FOR UPDATE`;
@@ -543,6 +551,8 @@ export const repairActivityService = {
           phoneLast4: phone.slice(-4),
           issueType,
           status: "REGISTERED",
+          consentVersion: repairActivityConsentVersion,
+          consentAcceptedAt: now,
           createdAt: now,
         },
       });
@@ -553,7 +563,12 @@ export const repairActivityService = {
         targetType: "RepairActivityRegistration",
         targetId: created.id,
         result: "SUCCESS",
-        after: { activityId, issueType, phoneMasked: maskActivityPhone(phone) },
+        after: {
+          activityId,
+          issueType,
+          phoneMasked: maskActivityPhone(phone),
+          consentVersion: repairActivityConsentVersion,
+        },
       });
       return {
         id: created.id,
