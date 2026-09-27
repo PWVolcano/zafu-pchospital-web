@@ -139,7 +139,20 @@ PR 中记录影响范围。不强制单独评审；但若影响其他模块，�
 - `PATCH /api/v1/admin/repair-categories/:id`
 - `POST /api/v1/admin/repair-categories/:id/deactivate`
 
-创建草稿、提交和审核使用 `Idempotency-Key`。更新草稿携带 `version`；过期版本返回
+幂等键的传递方式按端点分两类，两侧不互通：
+
+| 传递方式                     | 端点                                                                                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Idempotency-Key` **请求头** | 成员端写接口：`POST /api/v1/repairs`、`POST /api/v1/repairs/:id/submit`                                                                                            |
+| 请求体字段 `idempotencyKey`  | 管理端与后台写接口：`POST /api/v1/admin/repairs/:id/reviews`、`.../batch-reviews`、`admin/members`、`join-applications/:id/reviews`、`member-registrations/invite` |
+
+单条审核的键上限 128 位；批次键按 `${批次键}:${recordId}` 给每条记录派生一个键，`recordId` 是
+`Char(36)`，所以批次键上限是 `128 − 1 − 36 = 91` 位。
+
+> 单条审核曾读**头**而界面发**体**，两边对不上导致管理端审核必然 400（issue #62）。
+> 现在两类端点各按上表取值，`tests/integration/m6-admin.test.ts` 从真实路由打进一次以防回归。
+
+更新草稿携带 `version`；过期版本返回
 `REPAIR_VERSION_CONFLICT`。列表支持分页、成员、分类、状态、结果、日期、疑难、典型和关键词
 筛选；普通成员只能看到本人全部状态与他人的 `APPROVED` 记录。照片内容接口要求有效 Session，
 并返回私有缓存、`nosniff`、正确 MIME 与长度。

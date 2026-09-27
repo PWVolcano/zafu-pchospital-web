@@ -82,6 +82,27 @@ export const repairResultLabels: Record<(typeof RepairResult)[number], string> =
   COMPLETED: "已完成",
   NOT_COMPLETED: "未完成",
 };
+/**
+ * 维修记录字段的硬限制。
+ *
+ * 服务端校验与表单 HTML 属性共用这一组数值 —— 两边各写一份是「限制看着有、实际没生效」
+ * 的常见来源（issue #62 后端3）。
+ */
+export const repairFieldLimits = {
+  contentMaxLength: 10000,
+  remarkMaxLength: 2000,
+  durationMinutesMin: 1,
+  durationMinutesMax: 10080,
+  /** 维修日期下限：早于它的基本是年份打错（1026 年、202 年这类）。 */
+  repairDateMin: "2020-01-01",
+} as const;
+export const repairEditorCopy = {
+  requiredMark: "必填",
+  /** 表单是「先存草稿、再提交」两步，必填只针对提交那一刻。 */
+  requiredNote: "标注「必填」的字段在提交审核前必须填齐；草稿可以先保存。",
+  dateHint: "不得晚于今天。",
+  contentHint: `提交审核时必填，最多 ${repairFieldLimits.contentMaxLength} 字。`,
+};
 /** 成员端不填写维修结果，缺省按「已完成」记录；管理员仍可在管理端改成「未完成」。 */
 export const defaultRepairResult: RepairResult = "COMPLETED";
 export const repairTimelineLabels = {

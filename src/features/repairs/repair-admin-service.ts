@@ -17,6 +17,13 @@ import {
 } from "@/types/contracts";
 
 /**
+ * 批次幂等键的上限。单条审核的键上限是 128（`repair-review-service`），而这里按
+ * `${key}:${recordId}` 给每条记录派生一个键，`recordId` 是 `Char(36)`，
+ * 所以批次键本身最长 `128 − 1 − 36`。原先写死 96，派生值可达 133，会被单条那一关拒绝。
+ */
+const BATCH_KEY_MAX_LENGTH = 128 - 1 - 36;
+
+/**
  * 维修记录管理端服务（M6 §64、§68）。
  *
  * 与成员侧的分工：成员只能改自己的 `DRAFT` / `REJECTED`（`assertCanEditRepair`），
@@ -137,7 +144,8 @@ export const repairAdminService: RepairAdminServiceContract = {
         `单次批量最多 ${ADMIN_BATCH_LIMIT} 条记录，请分批执行`,
       );
     const key = input.idempotencyKey.trim();
-    if (!key || key.length > 96) throw new AppError("VALIDATION_FAILED", "Idempotency-Key 无效");
+    if (!key || key.length > BATCH_KEY_MAX_LENGTH)
+      throw new AppError("VALIDATION_FAILED", "Idempotency-Key 无效");
     // 退回必填原因：这是**整批**的前置约束，在入口直接拒绝，
     // 而不是让 N 条记录各自失败一次（那只会给界面刷出 N 条同样的错误）。
     if (input.decision === "REJECTED" && !input.note?.trim())

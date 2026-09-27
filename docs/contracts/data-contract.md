@@ -69,7 +69,9 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
 - `repair_records.member_profile_id` 是唯一业务归属，不保存 QQ、手机号或姓名外键。
 - 状态只允许 `DRAFT → PENDING → APPROVED|REJECTED` 和 `REJECTED → PENDING`。
 - `version` 在记录修改、提交、审核、标记和软删除时递增；成员保存必须提交当前版本。
-- 草稿允许不完整；成员提交时要求业务日期、启用分类、至多 10000 字的正文（选填）和至少一张有效照片。
+- 草稿允许不完整；成员提交时要求业务日期（不早于 2020-01-01、不晚于今天）、启用分类、
+  非空正文（至多 10000 字）和至少一张有效照片。日期范围与正文必填在保存草稿时就开始校验
+  （issue #62 后端3），字段上下限集中在 `src/config/repairs.ts` 的 `repairFieldLimits`。
 - 维修结果默认「已完成」：成员端不填写该字段，缺省写入 `COMPLETED`，管理端仍可改成「未完成」。
   维修时长同样只在管理端维护，不参与成员提交校验。
 - `repair_reviews` 和 `repair_timeline_events` 只追加；退回审核意见必填。

@@ -9,8 +9,9 @@ import { AdminToast } from "@/components/admin/AdminToast";
 import type { AdminToastMessage, AdminToastTone } from "@/components/admin/AdminToast";
 import { Button } from "@/components/ui/Button";
 import { adminCopy, adminShared } from "@/config/admin";
-import { repairResultLabels, repairStatusLabels } from "@/config/repairs";
+import { repairFieldLimits, repairResultLabels, repairStatusLabels } from "@/config/repairs";
 import { adminFetch } from "@/features/admin/admin-client";
+import { shanghaiToday } from "@/lib/shanghai-date";
 import { RepairResult } from "@/types/contracts";
 import type {
   RepairCategoryView,
@@ -310,6 +311,8 @@ export function RepairAdminActions({
               className="field__input"
               type="date"
               name="repairDate"
+              min={repairFieldLimits.repairDateMin}
+              max={shanghaiToday()}
               defaultValue={record.repairDate ?? ""}
             />
           </label>
@@ -360,7 +363,7 @@ export function RepairAdminActions({
           <textarea
             className="field__input min-h-32"
             name="content"
-            maxLength={10000}
+            maxLength={repairFieldLimits.contentMaxLength}
             defaultValue={record.content ?? ""}
           />
         </label>
@@ -369,7 +372,7 @@ export function RepairAdminActions({
           <textarea
             className="field__input min-h-24"
             name="remark"
-            maxLength={2000}
+            maxLength={repairFieldLimits.remarkMaxLength}
             defaultValue={record.remark ?? ""}
           />
         </label>
@@ -385,7 +388,12 @@ export function RepairAdminActions({
         </div>
       </form>
 
-      <form method="post" className="admin-form" onSubmit={submitFlags} aria-label={copy.flags.title}>
+      <form
+        method="post"
+        className="admin-form"
+        onSubmit={submitFlags}
+        aria-label={copy.flags.title}
+      >
         <h4 className="admin-panel__title">{copy.flags.title}</h4>
         <div className="repair-filters__checks">
           <label>
