@@ -107,6 +107,18 @@ jobs:
         # 等每条 pnpm 命令都不会再次启用新包等待期。
         run: pnpm install --frozen-lockfile
 
+      # 依赖漏洞审计：**先只警告，不阻断**。
+      # 首次接入就发现 5 个 high / 6 个 moderate（mariadb、mysql2、postcss、deepmerge-ts、uuid），
+      # 其中多数只差一个补丁版本 —— 但这些包升级要单独验证，不能让它们把每个 PR 都卡住。
+      # 观察一段时间后再决定是否收紧，或改成「只对 high/critical 阻断」。
+      - name: 依赖漏洞审计（不阻断）
+        run: |
+          set -uo pipefail
+          pnpm audit --audit-level=high || {
+            echo "::warning::pnpm audit 报出 high/critical 级别的依赖漏洞，详见本步骤输出。"
+            echo "::warning::本步骤刻意不阻断构建；请把它当成待办清单，按 GHSA 链接评估后再升级。"
+          }
+
       # pnpm lint = ESLint + 主题调色板一致性校验
       - name: 检查（lint + 调色板一致性）
         run: pnpm lint

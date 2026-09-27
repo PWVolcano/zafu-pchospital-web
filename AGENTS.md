@@ -444,10 +444,17 @@ pnpm build     # 必须成功；已包含站内文档构建，需要 mdBook（�
 1. 解析并固定文档版本（`DOCS_REF` → sha，保证构建可复现）
 2. 把文档仓库检出到 `.docs-source/`
 3. 安装**固定版** mdBook（版本写在 workflow 的 `MDBOOK_VERSION`，不用 `latest`）
-4. `pnpm install` → `pnpm lint` → `pnpm build`（含文档）
+4. `pnpm install` → `pnpm audit`（**不阻断**，见下）→ `pnpm lint` → `pnpm build`（含文档）
 5. 校验构建产物：`public/handbook/index.html`、`searchindex`、官网主题 CSS/JS、清单结构
 6. 起生产服务冒烟：`/`、`/about`、`/join`、`/docs`、`/handbook/` 必须全部 200
 7. `main` 上通过后调用部署
+
+**依赖漏洞审计：**
+
+`pnpm audit` 在 CI 里**只警告不阻断**（`--audit-level=high`，报出的 high/critical 会打成
+`::warning::` 注解）。它给出的是一份**待办清单**，不是「构建失败」—— 看到注解就按 GHSA
+链接评估、单独提升级 PR，不要在同一个 PR 里顺手升级依赖。依赖自动更新（Dependabot）
+**暂不启用**，依赖升级由人按审计结果手工做。
 
 **仓库侧设置（代码里做不到，只能上 GitHub 改）：**
 
