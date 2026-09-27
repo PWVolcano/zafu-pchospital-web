@@ -25,8 +25,15 @@ export const siteConfig = {
   description:
     "浙江农林大学电脑医院的社团综合服务平台。志愿性计算机技术服务：电脑散热模组深度清理、硬件故障排查、系统与软件问题处理、网络问题排查、计算机基础答疑。",
 
-  /** 正式域名待绑定后替换 */
-  url: "https://github.com/ZAFU-PCHospital",
+  /**
+   * 正式站点地址（末尾不带斜杠）
+   *
+   * `layout.tsx` 的 `metadataBase`、`robots.txt` 与 `sitemap.xml` 都从这里取绝对地址，
+   * 所以它必须是线上真实域名，不能填仓库地址 —— 否则爬虫与社交卡片拿到的全是 GitHub 链接。
+   * 与服务器 `.env` 的 `APP_BASE_URL` 保持同一个域名（含 www 变体的白名单见
+   * `src/lib/auth/request.ts`）。
+   */
+  url: "https://pczafu.cn",
 
   /** GitHub 组织 */
   githubOrg: "https://github.com/ZAFU-PCHospital",
