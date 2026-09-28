@@ -518,6 +518,7 @@ function repair(overrides: Partial<RepairView> = {}): RepairView {
       sortOrder: 1,
       isActive: true,
     },
+    deviceModel: null,
     content: "重装系统",
     result: "COMPLETED",
     remark: null,

@@ -23,7 +23,9 @@ import {
 /**
  * 首页近场活动预览（UX R3 / R7）
  *
- * 服务端取 listPublic（口径 C6），方案 B 后滤未结束取前 1–3。
+ * 服务端取 listPublic（口径 C6），再按首页预览口径挑未结束的前 1–3 条：
+ * **报名开放中（OPEN）优先**，其次 UPCOMING，再其次 FULL / CLOSED，同档内 activityAt 升序
+ * （`pickNonEndedRepairActivitiesForHomePreview`）。公开列表页自己的「方案 B」排序不受影响。
  * 无未结束活动或数据不可用时整块不渲染（口径 C5）。
  * 不改动公开列表页 RepairActivityList（#59）。
  */
@@ -86,9 +88,6 @@ function formatCapacityLine(item: RepairActivityPublicView): string {
   const capacity = homeActivityPreview.capacity
     .replace("{registered}", String(item.registeredCount))
     .replace("{capacity}", String(item.capacity));
-  const remaining = homeActivityPreview.remainingShort.replace(
-    "{count}",
-    String(item.remaining),
-  );
+  const remaining = homeActivityPreview.remainingShort.replace("{count}", String(item.remaining));
   return `${remaining} · ${capacity}`;
 }

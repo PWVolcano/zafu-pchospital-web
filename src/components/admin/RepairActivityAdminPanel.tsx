@@ -211,6 +211,13 @@ export function RepairActivityAdminPanel() {
     await load();
   }
 
+  /**
+   * 报名列表的起始序号。这份报名一次取回、没有分页，因此永远是 1；
+   * 口径与成员表的 `firstRowNumber + index` 一致 —— 序号是「列表里的第几行」，
+   * 不是另一套业务编号。
+   */
+  const registrationFirstRowNumber = 1;
+
   return (
     <div className="admin-workspace__content">
       <div className="admin-workspace__header">
@@ -450,21 +457,29 @@ export function RepairActivityAdminPanel() {
               <table className="admin-table">
                 <thead>
                   <tr>
+                    <th>{copy.registrations.rowNumber}</th>
                     <th>{copy.registrations.name}</th>
                     <th>{copy.registrations.phone}</th>
                     <th>{copy.registrations.issueType}</th>
+                    <th>{copy.registrations.deviceModel}</th>
                     <th>{copy.registrations.status}</th>
                     <th>{copy.table.actions}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {registrations.map((registration) => (
+                  {registrations.map((registration, index) => (
                     <tr key={registration.id}>
+                      <td data-label={copy.registrations.rowNumber}>
+                        {registrationFirstRowNumber + index}
+                      </td>
                       <td data-label={copy.registrations.name}>{registration.name}</td>
                       <td data-label={copy.registrations.phone}>{registration.phone}</td>
                       <td data-label={copy.registrations.issueType}>
                         {repairActivityIssueTypeLabels[registration.issueType] ??
                           registration.issueType}
+                      </td>
+                      <td data-label={copy.registrations.deviceModel}>
+                        {registration.deviceModel ?? "—"}
                       </td>
                       <td data-label={copy.registrations.status}>
                         {registration.deletedAt ? copy.registrations.deleted : registration.status}

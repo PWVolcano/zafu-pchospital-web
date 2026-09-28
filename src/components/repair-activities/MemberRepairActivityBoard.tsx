@@ -210,11 +210,7 @@ export function MemberRepairActivityBoard({ activityId }: Props) {
       {!board.attended ? (
         <Card className="activity-board__attend-banner" variant="notice">
           <p role="status">{copy.attendPrompt}</p>
-          <Button
-            variant="solid"
-            onClick={() => void attend()}
-            disabled={busy !== null}
-          >
+          <Button variant="solid" onClick={() => void attend()} disabled={busy !== null}>
             {busy === "attend" ? copy.attending : copy.attendCta}
           </Button>
         </Card>
@@ -254,6 +250,8 @@ export function MemberRepairActivityBoard({ activityId }: Props) {
                       <span className="muted">
                         {" "}
                         · {row.phoneMasked} · {row.issueTypeLabel}
+                        {/* 机型选填：没填就不占位（issue #68）。 */}
+                        {row.deviceModel ? ` · ${copy.deviceModel} ${row.deviceModel}` : null}
                       </span>
                     </span>
                   </label>
@@ -282,18 +280,29 @@ export function MemberRepairActivityBoard({ activityId }: Props) {
             <p className="muted activity-board__empty">{copy.queueEmpty}</p>
           ) : (
             <ul className="activity-board__list">
-              {board.queue.map((row) => (
+              {board.queue.map((row, index) => (
                 <li key={row.id} className="activity-board__row activity-board__row--queue">
-                  <div>
-                    <strong>{row.name}</strong>
-                    <div className="muted">
-                      {copy.phone} {row.phoneMasked} · {copy.issueType} {row.issueTypeLabel}
-                    </div>
-                    {row.checkedInAt ? (
+                  <div className="activity-board__queue-main">
+                    {/* 队列位次：按当前渲染顺序从 1 开始（服务端已按签到时间升序）。 */}
+                    <span className="activity-board__queue-rank">
+                      {copy.queueRank.replace("{index}", String(index + 1))}
+                    </span>
+                    <div>
+                      <strong>{row.name}</strong>
                       <div className="muted">
-                        {copy.checkedInAt} {formatShanghaiDateTime(row.checkedInAt)}
+                        {copy.phone} {row.phoneMasked} · {copy.issueType} {row.issueTypeLabel}
                       </div>
-                    ) : null}
+                      {row.deviceModel ? (
+                        <div className="muted">
+                          {copy.deviceModel} {row.deviceModel}
+                        </div>
+                      ) : null}
+                      {row.checkedInAt ? (
+                        <div className="muted">
+                          {copy.checkedInAt} {formatShanghaiDateTime(row.checkedInAt)}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                   <div className="activity-board__row-actions">
                     <Button
