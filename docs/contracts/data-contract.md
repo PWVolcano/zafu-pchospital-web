@@ -69,11 +69,12 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
 - `repair_records.member_profile_id` 是唯一业务归属，不保存 QQ、手机号或姓名外键。
 - 状态只允许 `DRAFT → PENDING → APPROVED|REJECTED` 和 `REJECTED → PENDING`。
 - `version` 在记录修改、提交、审核、标记和软删除时递增；成员保存必须提交当前版本。
-- 草稿允许不完整；成员提交时要求业务日期（不早于 2020-01-01、不晚于今天）、启用分类、
-  非空正文（至多 10000 字）和至少一张有效照片。日期范围与正文必填在保存草稿时就开始校验
+- 草稿允许不完整；成员提交时要求业务日期（不早于 2020-01-01、不晚于今天）、维修时长
+  （1–10080 的整数分钟，issue #72 起必填）、启用分类、
+  非空正文（至多 10000 字）和至少一张有效照片。日期范围、时长上下限与正文必填在保存草稿时就开始校验
   （issue #62 后端3），字段上下限集中在 `src/config/repairs.ts` 的 `repairFieldLimits`。
 - 维修结果默认「已完成」：成员端不填写该字段，缺省写入 `COMPLETED`，管理端仍可改成「未完成」。
-  维修时长同样只在管理端维护，不参与成员提交校验。
+  维修时长由成员在填写记录时录入并提交必填（issue #72）；管理端仍可修正异常值。
 - `repair_reviews` 和 `repair_timeline_events` 只追加；退回审核意见必填。
 - 照片数据库只保存元数据与服务端 `storage_key`，文件不在 `public/` 下；照片访问继承维修记录可见性。
 - 分类使用稳定 `code` 幂等 Seed。停用分类不能用于新提交，但历史引用保留。
@@ -106,13 +107,14 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
   成功后版本递增；过期版本返回 `MEMBER_PROFILE_VERSION_CONFLICT`。
 - 资料的字段可见性由 `ProfileVisibilityPolicy` 裁剪，分三档：
 
-  | 视图 | 出现场景 | 含 QQ | 含学号/班级 | 含 `userId` |
-  |---|---|---|---|---|
-  | summary | 工作台、列表、公开响应 | 否 | 否 | 否 |
-  | self | 仅 `GET /member/profile` | 是 | 是 | 否 |
-  | internal | 仅 `GET /members/:id/profile` | 是 | 否 | 否 |
+  | 视图     | 出现场景                      | 含 QQ | 含学号/班级 | 含 `userId` |
+  | -------- | ----------------------------- | ----- | ----------- | ----------- |
+  | summary  | 工作台、列表、公开响应        | 否    | 否          | 否          |
+  | self     | 仅 `GET /member/profile`      | 是    | 是          | 否          |
+  | internal | 仅 `GET /members/:id/profile` | 是    | 否          | 否          |
 
   因此 QQ、学号、班级只存在于受保护的单成员详情，绝不进入列表、统计或公开数据。
+
 - 学生身份标识（学号、班级）当前由管理员维护，M3 不提供自助修改入口。
 
 ## M4 内部交流契约
