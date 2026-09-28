@@ -518,6 +518,8 @@ export type RepairView = {
   repairDate: string | null;
   durationMinutes: number | null;
   category: RepairCategoryView | null;
+  /** 机型（issue #68）：活动报名时填的选填字段，接待落单时带进记录；手工建单一般为 null。 */
+  deviceModel: string | null;
   content: string | null;
   result: RepairResult | null;
   remark: string | null;
@@ -538,6 +540,13 @@ export type RepairDetailView = RepairView & {
   canReview: boolean;
   canFlag: boolean;
   isFavorited: boolean;
+  /**
+   * 照片上传上限，以服务端 `.env`（`UPLOAD_MAX_BYTES` / `UPLOAD_MAX_FILES_PER_REPAIR`）为准。
+   *
+   * 随详情一起下发，是为了让前端提前拦下超限文件、并把真实数字写进提示 ——
+   * 前端各写一份常量会出现「提示说 10 MB、服务端按 5 MB 拒绝」（issue #68）。
+   */
+  photoLimits: { maxBytes: number; maxFiles: number };
 };
 export type RepairDraftFields = {
   repairDate?: string | null;
@@ -638,6 +647,9 @@ export type UpdateRepairCategoryInput = {
 
 /** 技能标签库管理视图。`usedByMemberCount` 只统计**当前生效**的成员关联，回答「停用会不会影响人」。 */
 export type SkillAdminView = SkillView & { usedByMemberCount: number };
+
+/** 技能名称上限（issue #68）：管理端新建与成员自建共用同一条规则，列宽 `VarChar(80)`。 */
+export const SKILL_NAME_MAX_LENGTH = 80;
 
 /** 新增技能标签。`code` / `sortOrder` 同 {@link CreateRepairCategoryInput}，由系统生成。 */
 export type CreateSkillInput = {

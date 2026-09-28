@@ -3667,6 +3667,50 @@ html[data-theme="black-yellow"] {
     border-left: 2px solid var(--accent);
     padding-left: var(--s-2);
   }
+  /* @提及候选：绝对定位浮层，打字时出现/消失都不推动下面的提示与提交按钮。 */
+  .community-composer__field {
+    position: relative;
+    inline-size: 100%;
+  }
+  .mention-menu {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + 0.25rem);
+    z-index: 20; /* 盖住同区块的提示与按钮，低于索引栏（80）与各类浮层 */
+    max-height: min(16rem, 40vh);
+    margin: 0;
+    padding: var(--s-1) 0;
+    list-style: none;
+    overflow-y: auto;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-base);
+    background: var(--surface-1);
+  }
+  .mention-menu--empty {
+    padding: var(--s-3) 0.85rem;
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .mention-menu__item {
+    display: block;
+    inline-size: 100%;
+    padding: 0.5rem 0.85rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .mention-menu__item--active {
+    background: var(--accent-wash);
+    color: var(--accent-deep);
+  }
+  /* 已被提及的名字：用设计系统里「标记文字」的令牌，不新造颜色。 */
+  .community-mention {
+    color: var(--accent-deep);
+    font-weight: 700;
+  }
   .community-list {
     display: grid;
     gap: var(--s-3);
@@ -6984,6 +7028,16 @@ html[data-theme="black-yellow"] {
       block-size: 0.875rem;
     }
 
+    /* ghost 的下划线是按 46px 按钮度量的（bottom: 0.7rem，落在文字下方留白里）；
+       压到 24px 后那段留白只剩 2.4px，同一个 0.7rem 会把线画到文字中间。
+       所以密度覆写必须连它一起改：左内缩跟着 padding-inline（0.55rem）走。 */
+    .admin-workspace .btn--ghost::after,
+    .admin-modal .btn--ghost::after {
+      left: 0.55rem;
+      right: 0.55rem;
+      bottom: 0.15rem;
+    }
+
     /* 表单控件：46px → 30px；标签与提示各降一档 */
     .admin-workspace .field__input,
     .admin-modal .field__input {
@@ -7415,6 +7469,21 @@ html[data-theme="black-yellow"] {
     grid-template-columns: 1fr auto;
     align-items: center;
   }
+}
+/* 队列位次（第 N 位）：位次与正文同在一个格子里（<600px 时整行只有一列，
+   单独成列会让位次跑到姓名上面一行）。位次列定宽，行与行之间的姓名左边缘
+   才对得齐（「第 9 位」与「第 10 位」不参差）；超过两位按内容放宽，不裁切。 */
+.activity-board__queue-main {
+  display: grid;
+  grid-template-columns: minmax(2.5rem, max-content) minmax(0, 1fr);
+  gap: var(--s-2);
+  align-items: baseline;
+}
+.activity-board__queue-rank {
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .activity-board__check {
   display: flex;

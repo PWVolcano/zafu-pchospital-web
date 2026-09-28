@@ -12,7 +12,7 @@ import type { NavItem } from "@/config/navigation";
 /**
  * 成员端二级导航（工作台重构版）
  *
- * 全部 8 个入口按任务域平铺成 4 组，不再把低频入口收进足部「设置」菜单 ——
+ * 全部 9 个入口按任务域平铺成 4 组，不再把低频入口收进足部「设置」菜单 ——
  * 藏起来的入口等于不存在的入口。窄屏（<1100px）时这 4 组不进顶栏，
  * 改由底部标签栏（工作台 / 维修 / 新增 / 消息 / 我的）+ 工作台首页的快捷入口承接。
  *
@@ -26,8 +26,8 @@ export type MemberNavGroup = {
 };
 
 /**
- * UX R3 / N1 · 口径 M-B：公开导航占 01–05，成员整段 +1 → 06–13，
- * 延续「公开 / 成员分段」历史约定（概览 06，维修 07–09，互动 10–12，账户 13）。
+ * UX R3 / N1 · 口径 M-B：公开导航占 01–05，成员整段 +1 → 06–14，
+ * 延续「公开 / 成员分段」历史约定（概览 06，维修 07–10，互动 11–13，账户 14）。
  */
 export const memberNav: readonly MemberNavGroup[] = [
   {
@@ -72,6 +72,14 @@ export const memberNav: readonly MemberNavGroup[] = [
         href: "/member/repair-activities",
         icon: "calendar",
       },
+      {
+        index: "10",
+        label: "案例库",
+        shortLabel: "案例",
+        labelEn: "Case Library",
+        href: "/member/cases",
+        icon: "book",
+      },
     ],
   },
   {
@@ -79,7 +87,7 @@ export const memberNav: readonly MemberNavGroup[] = [
     title: "互动",
     items: [
       {
-        index: "10",
+        index: "11",
         label: "消息通知",
         shortLabel: "消息",
         labelEn: "Notifications",
@@ -87,7 +95,7 @@ export const memberNav: readonly MemberNavGroup[] = [
         icon: "bell",
       },
       {
-        index: "11",
+        index: "12",
         label: "我的收藏",
         shortLabel: "收藏",
         labelEn: "Favorites",
@@ -95,7 +103,7 @@ export const memberNav: readonly MemberNavGroup[] = [
         icon: "heart",
       },
       {
-        index: "12",
+        index: "13",
         label: "排行榜",
         shortLabel: "排行",
         labelEn: "Rankings",
@@ -109,7 +117,7 @@ export const memberNav: readonly MemberNavGroup[] = [
     title: "账户",
     items: [
       {
-        index: "13",
+        index: "14",
         label: "个人资料",
         shortLabel: "资料",
         labelEn: "Profile",
@@ -229,6 +237,9 @@ export const memberCopy = {
     quickFavoritesDesc: "收藏的案例记录",
     quickRankings: "排行榜",
     quickRankingsDesc: "本学期维修榜",
+    /** 案例库没有进窄屏底部标签栏，工作台快捷入口是它在手机上的主要入口。 */
+    quickCases: "案例库",
+    quickCasesDesc: "典型案例与疑难案例",
     quickProfile: "编辑个人资料",
     quickProfileDesc: "昵称与技能标签",
 
@@ -272,6 +283,15 @@ export const memberCopy = {
     /** 标签选择器的剩余额度与单标签移除按钮文案（空态复用上面的 `skillsEmpty`）。 */
     skillsRemaining: "还可以添加 {count} 个",
     skillsRemove: "移除标签 {name}",
+
+    /** 标签库里没有想要的标签时，成员可以自己新建（issue #68，无需审核）。 */
+    skillCreateLabel: "新建标签",
+    skillCreatePlaceholder: "输入名称，如：拆机清灰",
+    skillCreateHint: "标签库没有的可以直接新建，它会进入公共标签库，其他成员也能选用。",
+    skillCreateAction: "新建",
+    skillCreateBusy: "新建中…",
+    skillCreated: "已新增「{name}」，点「保存」后关联到你的资料。",
+    skillCreateFailed: "标签新建失败，请稍后重试。",
     metricsTitle: "维修概览",
     metricsTag: "Repair Metrics",
     recentTitle: "最近已通过维修",

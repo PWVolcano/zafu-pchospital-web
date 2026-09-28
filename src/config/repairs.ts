@@ -100,9 +100,19 @@ export const repairEditorCopy = {
   requiredMark: "必填",
   /** 表单是「先存草稿、再提交」两步，必填只针对提交那一刻。 */
   requiredNote: "标注「必填」的字段在提交审核前必须填齐；草稿可以先保存。",
-  dateHint: "不得晚于今天。",
+  dateHint: "默认今天；不得晚于今天。",
   contentHint: `提交审核时必填，最多 ${repairFieldLimits.contentMaxLength} 字。`,
+  /** 照片上限来自服务端（随详情下发），所以文案留占位符而不是写死数字。 */
+  photoHint: "支持 JPEG、PNG、WebP；单张不超过 {size}、最多 {count} 张。提交审核至少需要一张。",
+  photoTooLarge: "「{name}」有 {size}，超过单张 {limit} 的上限，请压缩或换一张。",
+  photoTooMany: "已上传 {count} 张，最多只能再传 {remain} 张。",
 };
+/** 照片体积的可读写法：提示文案与服务端报错共用，避免两处各写一份换算。 */
+export function formatBytes(bytes: number): string {
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1) return `${Number(mb.toFixed(mb >= 10 ? 0 : 1))} MB`;
+  return `${Math.round(bytes / 1024)} KB`;
+}
 /** 成员端不填写维修结果，缺省按「已完成」记录；管理员仍可在管理端改成「未完成」。 */
 export const defaultRepairResult: RepairResult = "COMPLETED";
 export const repairTimelineLabels = {

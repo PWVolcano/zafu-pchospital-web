@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { repairDetailInclude } from "@/features/repairs/repair-repository";
+import { uploadLimits } from "@/features/repairs/repair-photo-storage";
 import type { AuthorizedActor, RepairDetailView, RepairView } from "@/types/contracts";
 
 type RecordRow = Prisma.RepairRecordGetPayload<{ include: typeof repairDetailInclude }>;
@@ -25,6 +26,7 @@ export function toRepairView(record: RecordRow): RepairView {
           isActive: record.category.isActive,
         }
       : null,
+    deviceModel: record.deviceModel,
     content: record.content,
     result: record.result as RepairView["result"],
     remark: record.remark,
@@ -60,6 +62,7 @@ export function toRepairDetail(
     canReview: actor.permissions.includes("repair:review") && record.status === "PENDING",
     canFlag: actor.permissions.includes("repair:flag"),
     isFavorited: options.isFavorited === true,
+    photoLimits: uploadLimits(),
     reviews: record.reviews.map((review) => ({
       id: review.id,
       decision: review.decision as "APPROVED" | "REJECTED",
