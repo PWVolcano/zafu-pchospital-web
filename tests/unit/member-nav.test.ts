@@ -12,13 +12,13 @@ import {
  * 成员端侧栏配置契约（工作台重构版）。
  *
  * 组件本身依赖 `next/navigation`，这里只锁配置层：
- * - 侧栏按 4 组平铺全部 8 个入口（概览 / 维修 / 互动 / 账户），不再有足部「设置」菜单；
- * - 编号延续公开 01–05 之后整段 +1 → 06–13，且全局唯一；
+ * - 侧栏按 4 组平铺全部 9 个入口（概览 / 维修 / 互动 / 账户），不再有足部「设置」菜单；
+ * - 编号延续公开 01–05 之后整段 +1 → 06–14，且全局唯一；
  * - 每条都有 `shortLabel`（窄屏标签栏短标）与 `label`；
  * - 入口位置变了，页面与接口不变，所有 href 必须仍然可达。
  */
 
-test("侧栏按 4 组平铺 8 个入口（概览 / 维修 / 互动 / 账户）", () => {
+test("侧栏按 4 组平铺 9 个入口（概览 / 维修 / 互动 / 账户）", () => {
   assert.deepEqual(
     memberNav.map((group) => group.title),
     ["概览", "维修", "互动", "账户"],
@@ -30,6 +30,7 @@ test("侧栏按 4 组平铺 8 个入口（概览 / 维修 / 互动 / 账户）",
       "/member/repairs",
       "/member/repairs/new",
       "/member/repair-activities",
+      "/member/cases",
       "/member/notifications",
       "/member/favorites",
       "/member/rankings",
@@ -38,11 +39,11 @@ test("侧栏按 4 组平铺 8 个入口（概览 / 维修 / 互动 / 账户）",
   );
 });
 
-test("成员导航编号为 06–13（公开 01–05 后整段 +1），且全局唯一", () => {
+test("成员导航编号为 06–14（公开 01–05 后整段 +1），且全局唯一", () => {
   const items = memberNav.flatMap((group) => group.items);
   assert.deepEqual(
     items.map((item) => item.index),
-    ["06", "07", "08", "09", "10", "11", "12", "13"],
+    ["06", "07", "08", "09", "10", "11", "12", "13", "14"],
   );
   assert.equal(new Set(items.map((item) => item.index)).size, items.length, "成员端入口编号重复");
 });

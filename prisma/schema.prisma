@@ -343,6 +343,8 @@ model RepairRecord {
   repairDate       DateTime?             @map("repair_date") @db.Date
   durationMinutes  Int?                  @map("duration_minutes")
   categoryId       String?               @map("category_id") @db.Char(36)
+  /// 机型（issue #68）：活动报名时的选填字段，接待落单时带进记录；手工建单一般为空。
+  deviceModel      String?               @map("device_model") @db.VarChar(60)
   content          String?               @db.Text
   result           String?               @db.VarChar(32)
   remark           String?               @db.VarChar(2000)
@@ -553,6 +555,8 @@ model RepairActivityRegistration {
   phone                   String         @db.VarChar(11)
   phoneLast4              String         @map("phone_last4") @db.VarChar(4)
   issueType               String         @map("issue_type") @db.VarChar(32)
+  /// 机型（issue #68）：选填，接待落单时带进维修记录。
+  deviceModel             String?        @map("device_model") @db.VarChar(60)
   status                  String         @db.VarChar(32)
   /// 报名时同意的免责声明版本与时间（issue #62 前端3）。历史报名没有签署动作，因此可空。
   consentVersion          String?        @map("consent_version") @db.VarChar(16)

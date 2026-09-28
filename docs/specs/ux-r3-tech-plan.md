@@ -155,7 +155,11 @@ R4：确认文案统一说清后果；成员撤回补齐同一交互模式（可
 | `sortRepairActivitiesForPublicList` | 方案 B 已实现；`listPublic` 已接线 |
 | `RepairActivityList` | `PAGE_SIZE = 4`，分页，无拖动 |
 
-R7：服务端或客户端取 `listPublic` 结果，过滤 `status !== "ENDED"`，取前 1–3（B 序下即未结束段按 `activityAt` 升序的前几条），卡片可点详情；「查看全部」→ `/repair-activities`。  
+R7（issue #68 定稿的口径）：`HomeActivityPreview` 服务端取 `listPublic`，按
+`pickNonEndedRepairActivitiesForHomePreview` 挑未结束的前 1–3 条 —— **报名开放中（OPEN）优先**，
+其次 UPCOMING，再其次 FULL / CLOSED，同档内 `activityAt` 升序；卡片可点详情；「查看全部」→
+`/repair-activities`。（早先「直接取 B 序前 3 条」会让已满 / 已截止的场次压在还能报名的场次前面，
+所以首页不复用列表页的排序。）  
 **勿**在首页复用横滑拖拽；卡片视觉可复用列表卡字段（标题 / 时间 / 状态 / 名额），布局用简单响应式网格即可。
 
 ### 3.9 图标
@@ -243,7 +247,7 @@ R7：服务端或客户端取 `listPublic` 结果，过滤 `status !== "ENDED"`�
 
 - [ ] 主按钮文案「报名活动」，进入 `/repair-activities`  
 - [ ] 次要链仍在且语义为报修/说明类（非死链）  
-- [ ] 有未结束活动时首页展示 1–3 张卡；均为未结束；时间升序；点击进详情  
+- [ ] 有未结束活动时首页展示 1–3 张卡；均为未结束；**OPEN 优先**、同档内时间升序；点击进详情  
 - [ ] 「查看全部」进列表；列表仍 ≤4/页、可翻页、不可拖、定宽等高  
 - [ ] 无未结束活动时的空态符合方案约定（隐藏整块或短文案）
 

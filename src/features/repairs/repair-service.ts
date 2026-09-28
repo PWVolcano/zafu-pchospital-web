@@ -200,6 +200,8 @@ export type CreateSubmittedForActivityInput = {
   content: string;
   remark: string;
   durationMinutes: number;
+  /** 报名时选填的机型（issue #68）；没填传 null。 */
+  deviceModel: string | null;
   /** 幂等键；建议 `activity-serve:{registrationId}` */
   createRequestKey: string;
   registrationId: string;
@@ -234,6 +236,7 @@ export async function createSubmittedForActivity(
       repairDate,
       durationMinutes: input.durationMinutes,
       categoryId: input.categoryId,
+      deviceModel: input.deviceModel,
       content: input.content,
       result: defaultRepairResult,
       remark: input.remark,

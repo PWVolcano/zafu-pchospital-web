@@ -155,6 +155,31 @@ export function assertValidRegistrantName(name: string): string {
   return trimmed;
 }
 
+/** 机型上限（issue #68）：与列宽一致（`VarChar(60)`），前端 HTML `maxLength` 也用它。 */
+export const REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH = 60;
+
+/** 机型选填：缺省、空串都算「没填」，落库统一为 null。 */
+export function assertValidDeviceModel(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string") {
+    throw new AppError("VALIDATION_FAILED", "机型格式无效", {
+      fieldErrors: { deviceModel: ["机型格式无效"] },
+    });
+  }
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  if (trimmed.length > REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH) {
+    throw new AppError(
+      "VALIDATION_FAILED",
+      `机型不超过 ${REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH} 个字符`,
+      {
+        fieldErrors: { deviceModel: [`不超过 ${REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH} 个字符`] },
+      },
+    );
+  }
+  return trimmed;
+}
+
 export function assertValidIssueType(value: unknown): RepairActivityIssueType {
   if (
     typeof value !== "string" ||

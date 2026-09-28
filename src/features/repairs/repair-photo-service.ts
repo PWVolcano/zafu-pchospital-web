@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { appendAuditLog } from "@/lib/audit/audit-service";
 import { AppError } from "@/lib/api/errors";
+import { formatBytes } from "@/config/repairs";
 import { getDb } from "@/lib/db/client";
 import { inSerializableTransaction } from "@/lib/db/transaction";
 import { assertCanEditRepair, assertCanReadRepair } from "./repair-policy";
@@ -32,7 +33,10 @@ export function createRepairPhotoService(storage: RepairPhotoStorage) {
       const prepared = await Promise.all(
         files.map(async (file) => {
           if (file.size > limits.maxBytes)
-            throw new AppError("REPAIR_PHOTO_TOO_LARGE", "单张照片超过大小限制");
+            throw new AppError(
+              "REPAIR_PHOTO_TOO_LARGE",
+              `「${file.name}」${formatBytes(file.size)}，超过单张 ${formatBytes(limits.maxBytes)} 的上限`,
+            );
           const bytes = new Uint8Array(await file.arrayBuffer());
           const detected = detectImageType(bytes);
           if (!detected || detected !== file.type)

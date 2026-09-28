@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { repairActivitiesPage } from "@/config/repair-activities";
 import {
   canAcceptNewRegistration,
+  REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH,
   repairActivityIssueTypeLabels,
   repairActivityStatusLabels,
   type RepairActivityIssueType,
@@ -36,6 +37,7 @@ export function RepairActivityDetail({ activityId }: Props) {
     name: string;
     phone: string;
     issueType: string;
+    deviceModel: string;
   } | null>(null);
   const signupFormRef = useRef<HTMLFormElement>(null);
 
@@ -80,6 +82,7 @@ export function RepairActivityDetail({ activityId }: Props) {
       name: data.name ?? "",
       phone: data.phone ?? "",
       issueType: data.issueType ?? "",
+      deviceModel: data.deviceModel ?? "",
     });
   }
 
@@ -317,6 +320,16 @@ export function RepairActivityDetail({ activityId }: Props) {
                     </option>
                   ))}
                 </select>
+              </label>
+              <label className="field">
+                <span className="field__label">{copy.deviceModel}</span>
+                <input
+                  className="field__input"
+                  name="deviceModel"
+                  maxLength={REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH}
+                  placeholder={copy.deviceModelPlaceholder}
+                  disabled={!open || busy}
+                />
               </label>
             </div>
             <div className="signup__actions">

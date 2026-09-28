@@ -9,6 +9,7 @@ import { mergeSkillOptions } from "@/features/skills/skill-options";
 import {
   MEMBER_NICKNAME_MAX_LENGTH,
   MEMBER_SKILL_LIMIT,
+  SKILL_NAME_MAX_LENGTH,
   type MemberSelfProfile,
   type SkillView,
 } from "@/types/contracts";
@@ -49,9 +50,15 @@ export function MemberProfileEditor({
     profile.skills.map((skill) => skill.id),
   );
   const [skillVersion, setSkillVersion] = useState(profile.version);
+  /**
+   * 成员本轮新建的标签（issue #68）。它们已经是库里的真实行，只是父级传入的
+   * `availableSkills` 是服务端渲染时的那一份、不会自己变，所以本地补进来。
+   */
+  const [createdSkills, setCreatedSkills] = useState<SkillView[]>([]);
+  const [newSkillName, setNewSkillName] = useState("");
   const skillOptions = useMemo(
-    () => mergeSkillOptions(availableSkills, profile.skills),
-    [availableSkills, profile.skills],
+    () => mergeSkillOptions([...availableSkills, ...createdSkills], profile.skills),
+    [availableSkills, createdSkills, profile.skills],
   );
 
   // 父级刷新资料后同步本地草稿（例如用户点了「取消」重新载入）
@@ -64,6 +71,8 @@ export function MemberProfileEditor({
 
   const [nicknameStatus, setNicknameStatus] = useState<Status>({ kind: "idle" });
   const [skillsStatus, setSkillsStatus] = useState<Status>({ kind: "idle" });
+  /** 新建标签的独立状态；技能区只渲染一条状态行（见下方渲染处），避免区块高度来回变。 */
+  const [createStatus, setCreateStatus] = useState<Status>({ kind: "idle" });
 
   const nicknameDirty = nickname !== (profile.nickname ?? "");
   const skillsDirty = useMemo(() => {
@@ -121,6 +130,7 @@ export function MemberProfileEditor({
       return;
     }
 
+    setCreateStatus({ kind: "idle" });
     setSkillsStatus({ kind: "saving" });
     try {
       const response = await fetch("/api/v1/member/profile/skills", {
@@ -159,8 +169,54 @@ export function MemberProfileEditor({
     skillVersion,
   ]);
 
+  /**
+   * 新建一个标签库里没有的标签，并顺手选中它（issue #68：成员自建，无需审核）。
+   *
+   * 同名标签由服务端复用（返回已有行），因此这里不需要「这个名字是不是已经有了」的预检；
+   * 新建只写标签库，**不**自动保存关联 —— 关联仍然由「保存」按钮走带乐观锁的 PUT，
+   * 两个动作不合并，避免一次点击里连做两次带版本号的写。
+   */
+  const createSkill = useCallback(async () => {
+    setCreateStatus({ kind: "saving" });
+    try {
+      const response = await fetch("/api/v1/skills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ name: newSkillName.trim() }),
+      });
+      const json = await response.json();
+
+      if (!json.success) {
+        setCreateStatus(describeFailure(json, copy.conflict, copy.skillCreateFailed));
+        return;
+      }
+
+      const created = json.data as SkillView;
+      setCreatedSkills((current) =>
+        current.some((skill) => skill.id === created.id) ? current : [...current, created],
+      );
+      setNewSkillName("");
+      // 已达上限时不自动选中：选择器自己的「已达上限」提示已经说明了原因。
+      setSelectedSkillIds((current) =>
+        current.includes(created.id) || current.length >= MEMBER_SKILL_LIMIT
+          ? current
+          : [...current, created.id],
+      );
+      setSkillsStatus({ kind: "idle" });
+      setCreateStatus({
+        kind: "saved",
+        message: copy.skillCreated.replace("{name}", created.name),
+      });
+    } catch {
+      setCreateStatus({ kind: "error", message: copy.skillCreateFailed });
+    }
+  }, [copy.conflict, copy.skillCreateFailed, copy.skillCreated, newSkillName]);
+
   const nicknameHint = copy.nicknameHint.replace("{max}", String(MEMBER_NICKNAME_MAX_LENGTH));
   const skillsLead = copy.skillsLead.replace("{limit}", String(MEMBER_SKILL_LIMIT));
+  /** 保存关联或新建标签期间，技能区的选择器/输入行一起禁用——两件事写的是同一批数据。 */
+  const skillsBusy = skillsStatus.kind === "saving" || createStatus.kind === "saving";
 
   return (
     <>
@@ -230,7 +286,7 @@ export function MemberProfileEditor({
           options={skillOptions}
           selectedIds={selectedSkillIds}
           limit={MEMBER_SKILL_LIMIT}
-          disabled={skillsStatus.kind === "saving"}
+          disabled={skillsBusy}
           labels={{
             empty: copy.skillsEmpty,
             remaining: copy.skillsRemaining,
@@ -243,10 +299,46 @@ export function MemberProfileEditor({
             setSkillsStatus({ kind: "idle" });
           }}
         />
+
+        {/* 标签库没有的名称可以自己新建（issue #68，无需审核）：输入行常驻，
+            不存在「点一下多出一行」的位移。 */}
+        <form
+          className="member-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void createSkill();
+          }}
+        >
+          <label className="field">
+            <span className="field__label">{copy.skillCreateLabel}</span>
+            <input
+              className="field__input"
+              value={newSkillName}
+              maxLength={SKILL_NAME_MAX_LENGTH}
+              placeholder={copy.skillCreatePlaceholder}
+              disabled={skillsBusy}
+              onChange={(event) => {
+                setNewSkillName(event.target.value);
+                setCreateStatus({ kind: "idle" });
+              }}
+            />
+            <span className="member-section__note">{copy.skillCreateHint}</span>
+          </label>
+          <div className="member-form__actions">
+            <Button
+              type="submit"
+              variant="ghost"
+              disabled={skillsBusy || newSkillName.trim() === ""}
+            >
+              {createStatus.kind === "saving" ? copy.skillCreateBusy : copy.skillCreateAction}
+            </Button>
+          </div>
+        </form>
+
         <div className="member-form__actions">
           <Button
             variant="solid"
-            disabled={skillsStatus.kind === "saving" || !skillsDirty}
+            disabled={skillsBusy || !skillsDirty}
             onClick={() => void saveSkills()}
           >
             {skillsStatus.kind === "saving" ? memberCopy.common.saving : memberCopy.common.save}
@@ -263,7 +355,8 @@ export function MemberProfileEditor({
             </Button>
           ) : null}
         </div>
-        <StatusLine status={skillsStatus} />
+        {/* 技能区共用一条状态行：新建与保存的结果不会同时有效，各占一行会让区块高度来回变。 */}
+        <StatusLine status={createStatus.kind === "idle" ? skillsStatus : createStatus} />
       </div>
     </>
   );

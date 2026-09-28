@@ -86,6 +86,13 @@ export function RepairDetail({ recordId, statusLabels, resultLabels, timelineLab
             <dt className="text-ink-3 text-sm">故障分类</dt>
             <dd>{record.category?.name ?? "待补充"}</dd>
           </div>
+          {/* 机型来自活动报名的选填字段（issue #68）：没有就不占一行。 */}
+          {record.deviceModel ? (
+            <div>
+              <dt className="text-ink-3 text-sm">机型</dt>
+              <dd>{record.deviceModel}</dd>
+            </div>
+          ) : null}
         </dl>
         <div className="community-flags-inline">
           {record.isDifficult ? (

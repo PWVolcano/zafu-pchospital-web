@@ -31,6 +31,9 @@ export const repairActivitiesPage = {
     name: "姓名",
     phone: "手机号",
     issueType: "故障类型",
+    /** 机型选填（issue #68）：填了成员到场前能先了解设备。 */
+    deviceModel: "机型（选填）",
+    deviceModelPlaceholder: "如：联想小新 Pro 14",
     submitSignup: "提交报名",
     submitLookup: "查询报名",
     submitUpdate: "保存故障类型",
@@ -98,6 +101,8 @@ export const memberRepairActivitiesCopy = {
     queueTitle: "排队中",
     queueTag: "Queue",
     queueEmpty: "排队为空。请到左侧勾选报名并点「签到入队」。",
+    /** 队列位次：按当前渲染顺序（服务端已按签到时间升序）从 1 开始。 */
+    queueRank: "第{index}位",
     checkIn: "签到入队",
     checkingIn: "签到中…",
     checkInSuccess: "已签到入队。",
@@ -110,12 +115,12 @@ export const memberRepairActivitiesCopy = {
     withdrawing: "撤回中…",
     withdrawSuccess: "已撤回排队。",
     withdrawConfirmTitle: "确认撤回排队？",
-    withdrawConfirmHint:
-      "撤回后该客户会离开排队，回到待签到列表；如需再次排队，须重新勾选并签到。",
+    withdrawConfirmHint: "撤回后该客户会离开排队，回到待签到列表；如需再次排队，须重新勾选并签到。",
     withdrawConfirm: "确认撤回",
     withdrawCancel: "取消",
     loading: "正在加载工作台…",
     issueType: "故障类型",
+    deviceModel: "机型",
     phone: "电话",
     name: "姓名",
     checkedInAt: "入队时间",

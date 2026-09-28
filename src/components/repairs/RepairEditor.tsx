@@ -1,17 +1,27 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
   defaultRepairResult,
+  formatBytes,
   repairEditorCopy,
   repairFieldLimits,
   repairResultLabels,
 } from "@/config/repairs";
 import { shanghaiToday } from "@/lib/shanghai-date";
 import type { RepairCategoryView, RepairDetailView } from "@/types/contracts";
+
+/** 点击整块日期输入框都弹出原生日历（默认只有右侧小图标会弹）。 */
+function openDatePicker(event: ReactMouseEvent<HTMLInputElement>) {
+  try {
+    event.currentTarget.showPicker();
+  } catch {
+    // 浏览器拒绝时（非用户手势、选择器已打开）忽略：原生点击行为不受影响。
+  }
+}
 
 export function RepairEditor({ recordId }: { recordId: string }) {
   const router = useRouter();
@@ -41,7 +51,13 @@ export function RepairEditor({ recordId }: { recordId: string }) {
         setState("forbidden");
         return;
       }
-      setRecord(detail.data);
+      // 「不填默认今天」：空值（含更早留下的草稿）打开时即按今天显示，
+      // 保存或提交那一刻才真正写进库。
+      setRecord(
+        detail.data.repairDate === null
+          ? { ...detail.data, repairDate: shanghaiToday() }
+          : detail.data,
+      );
       setCategories(cats.success ? cats.data : []);
       setState("ready");
     } catch {
@@ -116,13 +132,34 @@ export function RepairEditor({ recordId }: { recordId: string }) {
     if (!json.success) return;
     setRecord((current) => (current ? { ...current, photos: json.data.photos } : current));
   }
-  async function upload(files: FileList | null) {
-    if (!files?.length) return;
+  async function upload(files: File[]) {
+    if (!files.length || !record) return;
+    const selected = files;
+    const { maxBytes, maxFiles } = record.photoLimits;
+    // 先按服务端下发的上限拦一遍：超限的文件根本传不上去，不必等 multipart 走完再说。
+    const oversized = selected.find((file) => file.size > maxBytes);
+    if (oversized) {
+      setMessage(
+        repairEditorCopy.photoTooLarge
+          .replace("{name}", oversized.name)
+          .replace("{size}", formatBytes(oversized.size))
+          .replace("{limit}", formatBytes(maxBytes)),
+      );
+      return;
+    }
+    if (record.photos.length + selected.length > maxFiles) {
+      setMessage(
+        repairEditorCopy.photoTooMany
+          .replace("{count}", String(record.photos.length))
+          .replace("{remain}", String(Math.max(maxFiles - record.photos.length, 0))),
+      );
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
       const form = new FormData();
-      Array.from(files).forEach((file) => form.append("photos", file));
+      selected.forEach((file) => form.append("photos", file));
       const response = await fetch(`/api/v1/repairs/${recordId}/photos`, {
         method: "POST",
         body: form,
@@ -177,6 +214,9 @@ export function RepairEditor({ recordId }: { recordId: string }) {
     );
   if (!record) return null;
   const rejection = [...record.reviews].reverse().find((item) => item.decision === "REJECTED");
+  const photoHint = repairEditorCopy.photoHint
+    .replace("{size}", formatBytes(record.photoLimits.maxBytes))
+    .replace("{count}", String(record.photoLimits.maxFiles));
   return (
     <div className="gap-s-6 grid">
       {rejection ? (
@@ -205,6 +245,7 @@ export function RepairEditor({ recordId }: { recordId: string }) {
                 value={record.repairDate ?? ""}
                 min={repairFieldLimits.repairDateMin}
                 max={shanghaiToday()}
+                onClick={openDatePicker}
                 onChange={(e) => field("repairDate", e.target.value || null)}
               />
               <span className="field__hint">{repairEditorCopy.dateHint}</span>
@@ -269,7 +310,7 @@ export function RepairEditor({ recordId }: { recordId: string }) {
       <Card className="gap-s-4 grid">
         <div>
           <h2 className="text-display-3 font-bold">维修照片</h2>
-          <p className="text-ink-3">支持 JPEG、PNG、WebP，提交审核至少需要一张。</p>
+          <p className="text-ink-3">{photoHint}</p>
         </div>
         <label className="field">
           <span className="field__label">选择照片</span>
@@ -279,7 +320,13 @@ export function RepairEditor({ recordId }: { recordId: string }) {
             accept="image/jpeg,image/png,image/webp"
             multiple
             disabled={busy}
-            onChange={(e) => void upload(e.target.files)}
+            onChange={(e) => {
+              // 先拷成数组再清空 input：Blink 的 FileList 是活视图，清空 value 会把它一起清空，
+              // 存引用再清空等于传了个空列表；拷成数组后「同一张图片再选一次」也能触发 change。
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              void upload(files);
+            }}
           />
         </label>
         <div className="gap-s-4 grid md:grid-cols-2">

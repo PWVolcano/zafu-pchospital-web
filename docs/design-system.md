@@ -399,6 +399,8 @@ M4 稳定视觉模式（均在 `globals.css` `@layer components`，无 `box-shad
 | `.community-list` / `--compact` / `__item` / `__body` / `.is-unread` | 通知与收藏列表；未读用左侧强调线，不用红点 |
 | `.community-summary` / `__panel`                                     | 工作台底部两栏摘要（≥760px）               |
 | `.community-composer` / `.community-flags` / `.community-actions`    | 发表框、案例标记、收藏动作                 |
+| `.community-composer__field` / `.mention-menu*`                      | 发表框内定位容器 + `@提及`候选下拉（issue #68）：绝对定位浮层，不占布局 |
+| `.community-mention`                                                 | 正文里的已提及成员（`--accent-deep` 文字 + 淡底），不是链接               |
 
 M6 管理后台（`/admin/**`）稳定视觉模式。后台是**密集型数据界面**，因此它复用 M2 的表格基座而不是
 另造一套：`.admin-table` / `.admin-table-wrap` / `.admin-table__empty` 与 `.repair-table*`
@@ -446,7 +448,7 @@ round 端点）。后台需要新图标时按同样规则补 `Icon.tsx` 的 `sha
 | `.field` / `.field__label` / `.field__num` | 字段：两位编号 + 中文标签 + 必填标记                                    |
 | `.field__input`                            | 输入框：`--line-strong` 描边、`--r-base` 圆角、最小高度 46px、字号 16px |
 | `.field__hint`                             | 字段下方的格式说明（原生校验提示很简略，格式必须在这里讲清楚）          |
-| `.signup__actions` / `.signup__status`     | 提交行与状态 / 失败提示                                                 |
+| `.signup__actions` / `.signup__status`     | 提交行与**常驻状态行**：就地换成加载 / 提交中 / 失败原因，不新增元素   |
 | `.signup__done`                            | 提交完成后的确认面板（`--surface-1` 面板，**不是** `.notice`）          |
 
 规则：
@@ -458,6 +460,11 @@ round 端点）。后台需要新图标时按同样规则补 `Icon.tsx` 的 `sha
 - 提交成功**不用 `.notice`**（见 4.5），用中性面板 + 强调色标记。
 - **提交后新插入的内容不要包 `.reveal`**：`SiteEffects` 只在挂载时收集一次 `.reveal`，
   后插入的元素永远拿不到 `.is-in`，会一直停在 `opacity: 0`。
+- 状态行与按钮文案都是**原地替换**（`.signup__status` 常驻、`submittingLabel` 与主文案同字数），
+  句子长度相当就不会换行撑高，下方内容不会被顶动。
+- 提交按钮在脚本接上（hydration 完成）之前保持 `disabled`，状态行此时写「正在加载表单」：
+  这段窗口里原生提交会把整页 POST 一遍，看起来成功、实际丢件（issue #68，见
+  `MemberSignup` 文件头）。
 
 ### 4.7 后台构件（M6）
 
@@ -706,6 +713,23 @@ round 端点）。后台需要新图标时按同样规则补 `Icon.tsx` 的 `sha
   浮层 4 秒就消失，来不及抄。它们走内联区块并写明「只显示这一次」。
 - 表格里的辅助信息用 `.repair-table__flags`（次级文字色，另起一行）承载，
   不要为了「一行放更多」而把字号压到 `--t-xs` 以下。
+
+### 4.8 活动报名与接待台（M7）
+
+公开列表、成员活动页与接待台牌面共用同一张卡与同一套列表规则，没有新形态：
+
+| 类                                                       | 用途                                                                    |
+| -------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `.activity-list` / `--paged` / `--home-preview`          | 卡片列表：成员列表 ≥760px 是横滑带；公开列表 ≤4 列分页、首页预览 ≤3 列等宽 |
+| `.activity-card` / `__link` / `__head` / `__title` / `__meta` / `--ended` | 活动卡：标题钳制 2 行保证等高；已结束整卡降透明度，不加新色 |
+| `.activity-board__row--queue` / `__queue-main` / `__queue-rank` | 接待台队列行：位次与正文同格（窄屏不单独成列），位次列定宽让姓名左边缘对齐（issue #68） |
+| `.activity-board__check` / `__actions` / `__row-actions`  | 勾选行、底部动作条与行内动作组                                          |
+
+规则：
+
+- 队列位次用 `--t-xs` + `--ink-3` + `tabular-nums`：它是给眼睛定位用的辅助信息，
+  不能比姓名更抢眼；定宽取 `minmax(2.5rem, max-content)`，两位数（第 10 位）按内容放宽、不裁切。
+- 活动详情里的报名表单复用 `.signup` / `.field`（同一套表单控件），不另造第二套。
 
 ---
 

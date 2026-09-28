@@ -943,6 +943,62 @@ dbTest("回归：技能审计 before 记录的是移除前的真实集合，而�
   assert.deepEqual([...replayBefore].sort(), [a.code, c.code].sort());
 });
 
+dbTest("issue #68：成员自建标签——同名复用同一行，已被停用的同名标签明确拒绝", async () => {
+  const created = await createMember("自建标签");
+  const token = await createSessionToken(created.member.userId);
+  const { POST } = await import("../../src/app/api/v1/skills/route");
+  const name = `M3 自建标签 ${randomUUID().slice(0, 8)}`;
+  let skillId = "";
+
+  async function create(): Promise<{ status: number; json: Record<string, unknown> }> {
+    return callRoute(POST, "http://localhost/api/v1/skills", {
+      method: "POST",
+      headers: { cookie: `pc_hospital_session=${token}` },
+      body: { name },
+    });
+  }
+
+  try {
+    const first = await create();
+    assert.equal(first.status, 201, JSON.stringify(first.json));
+    const skill = first.json.data as { id: string; code: string; name: string; isActive: boolean };
+    skillId = skill.id;
+    assert.equal(skill.name, name);
+    // 中文名称走 `stableCodeFromName` 的哈希分支：标识由服务端生成，成员不填。
+    assert.match(skill.code, /^SK_[0-9A-F]{8}$/);
+    assert.equal(skill.isActive, true);
+    // 新标签必须立刻出现在成员可选项里（这正是「自建」的用处）。
+    const active = await skillService.listActive();
+    assert.ok(
+      active.some((row) => row.id === skill.id),
+      "自建标签必须出现在 listActive()",
+    );
+
+    // 同名再次提交：复用同一行，既不新增行也不重复写审计（成员重复点击不该攒出同名标签）。
+    const again = await create();
+    assert.equal(again.status, 201, JSON.stringify(again.json));
+    assert.equal((again.json.data as { id: string }).id, skill.id);
+    assert.equal(await getDb().skill.count({ where: { name } }), 1);
+    assert.equal(
+      await getDb().auditLog.count({ where: { action: "skill.created", targetId: skill.id } }),
+      1,
+    );
+
+    // 停用后同名必须拒绝：成员不能靠重新输入同一个名字把管理员停用的标签复活。
+    await getDb().skill.update({ where: { id: skill.id }, data: { isActive: false } });
+    const rejected = await create();
+    assert.equal(rejected.status, 409, JSON.stringify(rejected.json));
+    assert.equal((rejected.json.error as { code: string }).code, "SKILL_INACTIVE");
+  } finally {
+    // 自建标签不在 `prepareFixtures()` 的前缀清理范围内（它只按 realName 前缀删成员数据），
+    // 必须在这里自己收尾：否则第二轮会直接命中「已停用同名」分支，用例变成假失败。
+    if (skillId) {
+      await getDb().auditLog.deleteMany({ where: { targetType: "Skill", targetId: skillId } });
+    }
+    await getDb().skill.deleteMany({ where: { name } });
+  }
+});
+
 dbTest("回归：单路查询失败只降级该区块，其余区块照常返回真实数据", async () => {
   const created = await createMember("局部降级");
   const actor = memberActor(created.member.userId, "req_m3_degrade");

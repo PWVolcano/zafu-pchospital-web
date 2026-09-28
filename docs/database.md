@@ -121,6 +121,16 @@ M6 批次 2 引入 `public_content_settings`
 M6 批次 2 的其余能力（技能标签库 CRUD、评论管理、邀请码列表、审计查询、报名导出）
 全部建立在既有表上，没有新增表或列。
 
+活动模块引入 `repair_activities` / `repair_activity_registrations` /
+`repair_activity_attendances` 三张表（Migration `20260925100000_repair_activities`）。
+此后两次加列都是**可空前向迁移**，都不用默认值伪造历史数据：
+
+- `20260927120000_repair_activity_registration_consent`：报名表加 `consent_version` /
+  `consent_accepted_at`（issue #62）。迁移之前的报名没有签署动作，保持 `NULL`。
+- `20260928120000_repair_activity_device_model`：报名表与 `repair_records` 各加一列
+  `device_model VARCHAR(60) NULL`（issue #68）。报名时选填，接待落单时复制进维修记录；
+  历史报名与手工建单没有这个信息。不建外键、不建索引 —— 它只用于展示。
+
 完整字段与状态语义见 `docs/contracts/data-contract.md`。
 
 ## 7. 检查与测试

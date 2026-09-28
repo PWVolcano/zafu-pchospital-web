@@ -386,3 +386,66 @@ DELETE /api/v1/member/notifications/:id
 - 校验顺序是「先字段、后同意」：手机号填错的人先看到格式问题，而不是先被要求同意声明。
 
 新增错误码：`ACTIVITY_CONSENT_REQUIRED`(400)。
+
+## 成员侧与维修收尾（issue #68）
+
+### 成员自建技能标签
+
+`POST /api/v1/skills`（原先只有 `GET`）：成员在个人资料编辑器里输入一个库里没有的名字即可
+新建并立即选中它，业务确认**无需审核** —— 标签库不可能预先覆盖所有人的技能。鉴权要求
+`member.skill.assign_self`（成员默认持有），并执行 `assertSameOrigin()`。
+
+- 请求体只接受 `{ name }`：描述、排序、`code` 仍由管理员或系统决定。名称上限与 M6 管理端
+  同一条规则（`SKILL_NAME_MAX_LENGTH` = 80，列宽 `VarChar(80)`）；空白或超限 400
+  `VALIDATION_FAILED`（带 `fieldErrors.name`）。
+- **同名即复用**：已有同名且启用中的标签直接返回该行 —— 不新建、不写审计，
+  重复提交因此天然幂等，也不会攒出一堆同名标签。
+- 同名但**已停用**返回 409 `SKILL_INACTIVE`：停用是管理员的决定，成员不能靠重新输入
+  同一个名字把它复活。
+- `code` 由 `stableCodeFromName` 生成；名称不同却折叠出同一 code（如 `A/B` 与 `A B`）
+  返回 409 `SKILL_CODE_CONFLICT`，不悄悄返回另一个名字的标签；并发撞唯一键时回查同名行复用。
+- 标签库是**全体成员共享**的资源，因此按账号限流 **10 次 / 分钟**（键 `skill:create:<userId>`）。
+- 新建**只写标签库、不自动保存关联**：关联仍由「保存」按钮走带乐观锁的
+  `PUT /member/profile/skills`，两个动作不合并，避免一次点击里连做两次带版本号的写。
+
+### 活动报名选填机型
+
+- `POST /api/v1/repair-activities/[id]/registrations` 的 body 增加可选字段 `deviceModel`：
+  非字符串 400 `VALIDATION_FAILED`（`fieldErrors.deviceModel`）；缺省 / `null` / 空白一律
+  落库 `null`；上限 `REPAIR_ACTIVITY_DEVICE_MODEL_MAX_LENGTH` = 60（与列宽一致）。
+  **选填**，不参与任何必填校验。
+- 机型出现在三处读模型：公开报名回执 `RegistrationPublicView.deviceModel`、管理端报名列表
+  `RegistrationAdminView.deviceModel`、接待台 `StaffRegistrationView.deviceModel`（没填就不显示，
+  不占位）。
+- 接待落单（`POST /api/v1/member/repair-activities/:id/serve`）把报名上的机型**复制**进新建的
+  维修记录，两边看到的是同一个值；之后各自独立 —— 用 `editToken` 修改报名只改 `issueType`，
+  不回写已有记录。
+- 两列都可空（Migration `20260928120000_repair_activity_device_model`）：历史报名与手工建单
+  没有这个信息，不用默认值伪造。
+
+### 维修详情下发照片上限
+
+- `GET /api/v1/repairs/:id` 的 `RepairDetailView` 增加 `photoLimits` `{ maxBytes, maxFiles }`，
+  取值来自服务端 `.env` 的 `UPLOAD_MAX_BYTES` / `UPLOAD_MAX_FILES_PER_REPAIR`
+  （`repair-photo-storage` 的 `uploadLimits()`）。
+- 随详情下发而不是前端各写一份常量：两处各写会出现「界面提示 10 MB、服务端按 5 MB 拒绝」。
+  客户端据此在**选文件时**先拦超限项；服务端仍逐张复检，超限返回 413
+  `REPAIR_PHOTO_TOO_LARGE`，消息带文件名与实际体积（`「xx.jpg」12.4 MB，超过单张 10 MB 的上限`）。
+  `maxBytes` 是**单张**上限，不是本次合计。
+
+### 成员案例库（前端页面，无新接口）
+
+`/member/cases` 取数复用 `GET /api/v1/repairs` 的既有筛选
+（`status=APPROVED` + `isTypical` / `isDifficult` / `categoryId` / `query` + 分页），
+不单开接口 —— 普通成员本来就能看到他人的 `APPROVED` 记录，案例库只是换一种读法：
+只读、无状态动作、每页 12 条。分页沿用 `.repair-pagination` 的上一页 / 下一页。
+
+### 只在客户端表达、不改接口的两项
+
+- **报名队列位次**：队列本就按签到时间升序（服务端顺序即口径），位次取渲染顺序（从 1 起），
+  没有新增字段或接口。
+- **首页近场活动「报名开放中优先」**：`pickNonEndedRepairActivitiesForHomePreview`
+  按 OPEN → UPCOMING → FULL / CLOSED 分档，同档内 `activityAt` 升序，`ENDED` 不进预览；
+  公开列表仍按方案 B 的 `activityAt` 排序（口径见 `docs/specs/ux-r3-tech-plan.md`）。
+
+新增错误码：无（`SKILL_INACTIVE` 与 `SKILL_CODE_CONFLICT` 已分别在 M3、M6 批次 2 登记）。

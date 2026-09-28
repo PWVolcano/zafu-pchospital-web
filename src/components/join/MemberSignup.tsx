@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
@@ -24,14 +24,21 @@ import { pad2, revealIndex } from "@/lib/utils";
  *    也不会自造一套错误提示样式。
  * 2. 提交逻辑只有 submitMemberSignup 一个入口（src/lib/member-signup.ts）。
  *    它调用同源 API，并统一处理服务端回执与错误信封。
- * 3. 提交完成后才渲染招新群二维码 ——「填写完成后进行显示」。
+ * 3. 按钮在 hydration 完成前是禁用态（见下面 ready 的注释）。
+ *    页面是 SSR 出来的，脚本就绪之前表单已经长在页面上：这段时间点「提交登记」，
+ *    浏览器会做一次**原生表单提交**（POST 到本页），整页重载、字段清空，
+ *    而报名根本没进系统 —— 用户看到的正是「提交很慢、没有任何反馈」，还会重复提交。
+ *    2026-09-28 实测（生产站，Slow 3G + CPU 4 倍降速）：hydration 要 5.6 秒才完成，
+ *    低端手机上的这个窗口相当大。宁可点不动，也不能看起来成功却丢件；
+ *    这段时间按钮旁的状态行写的是「正在加载表单」，就绪后换成隐私告知。
+ * 4. 提交完成后才渲染招新群二维码 ——「填写完成后进行显示」。
  *    这一块不能包 Reveal：SiteEffects 只在挂载时收集一次 .reveal，
  *    后插入的 .reveal 永远不会拿到 .is-in，会一直停在 opacity: 0。
  *    也不做「自动滚到二维码」：二维码要等图片加载完才撑开高度，
  *    此时按错误高度滚动反而会把版面推歪。它就在右侧（小屏在下方），
  *    面板里也写清了「最后一步：扫码加入招新群」。
- * 4. form 显式声明 method="post"：脚本不可用时浏览器会直接提交表单，
- *    用 GET 会把手机号写进地址栏与浏览器历史，post 至少不会泄漏到 URL。
+ * 5. form 显式声明 method="post"：万一仍有原生提交发生（脚本不可用、或被禁用的
+ *    按钮绕过去了），用 GET 会把手机号写进地址栏与浏览器历史，post 至少不泄漏到 URL。
  */
 
 type SignupStatus = "idle" | "submitting" | "done";
@@ -41,7 +48,21 @@ export function MemberSignup() {
   const [problem, setProblem] = useState("");
   const [receipt, setReceipt] = useState<MemberSignupReceipt | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  /**
+   * 只有脚本接上（hydration 完成）之后才允许提交：这之前按钮按下会走浏览器原生提交，
+   * 结果是整页重载 + 报名丢失（原因见文件头注释 3）。
+   */
+  const [ready, setReady] = useState(false);
+  const submitting = status === "submitting";
   const done = status === "done";
+  // 就绪说明必须写进 SSR 输出：等脚本接上才换提示，慢网络下那段等待仍然是「点了没反应」
+  const statusNote = submitting
+    ? joinSignup.submittingNote
+    : ready
+      ? joinSignup.privacy
+      : joinSignup.loadingNote;
+
+  useEffect(() => setReady(true), []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -98,7 +119,13 @@ export function MemberSignup() {
               </Button>
             </div>
           ) : (
-            <form className="signup__form" ref={formRef} method="post" onSubmit={handleSubmit}>
+            <form
+              className="signup__form"
+              ref={formRef}
+              method="post"
+              onSubmit={handleSubmit}
+              aria-busy={submitting}
+            >
               {joinSignupFields.map((field, index) => (
                 <div className="field" key={field.name}>
                   <label className="field__label" htmlFor={`signup-${field.name}`}>
@@ -128,10 +155,14 @@ export function MemberSignup() {
               ))}
 
               <div className="signup__actions">
-                <Button type="submit" variant="solid" disabled={status === "submitting"}>
-                  {status === "submitting" ? joinSignup.submittingLabel : joinSignup.submitLabel}
+                <Button type="submit" variant="solid" disabled={!ready || submitting}>
+                  {submitting ? joinSignup.submittingLabel : joinSignup.submitLabel}
                 </Button>
-                <p className="signup__status">{joinSignup.privacy}</p>
+                {/* 状态行常驻：只换文案，不新增元素（几句长度相当，不会因此换行或撑高），
+                    避免把下方的错误提示顶来顶去。 */}
+                <p className="signup__status" role="status" aria-live="polite">
+                  {statusNote}
+                </p>
               </div>
 
               {problem ? (

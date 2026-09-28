@@ -17,6 +17,7 @@ import type {
   SkillView,
   UpdateSkillInput,
 } from "@/types/contracts";
+import { SKILL_NAME_MAX_LENGTH } from "@/types/contracts";
 
 /**
  * 技能标签库管理（M6 批次 2，需求 §4.4「管理技能标签」）。
@@ -53,7 +54,8 @@ export const skillAdminService: SkillAdminServiceContract = {
   async create(input: CreateSkillInput, actor: AuthorizedActor): Promise<SkillView> {
     requirePermission(actor, "skill:manage");
     const name = input.name.trim();
-    if (!name || name.length > 80) throw new AppError("VALIDATION_FAILED", "技能名称无效");
+    if (!name || name.length > SKILL_NAME_MAX_LENGTH)
+      throw new AppError("VALIDATION_FAILED", "技能名称无效");
     // `code` 现在由系统生成（留空时），仍然接受显式传入以便脚本/迁移使用。
     const code = (input.code?.trim() || stableCodeFromName(name, "SK")).toUpperCase();
     if (!/^[A-Z][A-Z0-9_]{1,63}$/.test(code)) {
@@ -106,7 +108,10 @@ export const skillAdminService: SkillAdminServiceContract = {
     requirePermission(actor, "skill:manage");
     const before = await getDb().skill.findFirst({ where: { id: skillId, deletedAt: null } });
     if (!before) throw new AppError("SKILL_NOT_FOUND", "技能标签不存在");
-    if (input.name !== undefined && (!input.name.trim() || input.name.trim().length > 80)) {
+    if (
+      input.name !== undefined &&
+      (!input.name.trim() || input.name.trim().length > SKILL_NAME_MAX_LENGTH)
+    ) {
       throw new AppError("VALIDATION_FAILED", "技能名称无效");
     }
     return inSerializableTransaction(async (tx) => {

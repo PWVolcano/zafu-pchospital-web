@@ -48,6 +48,8 @@ export type StaffRegistrationView = {
   phoneMasked: string;
   issueType: RepairActivityIssueType;
   issueTypeLabel: string;
+  /** 机型，选填（issue #68）：接待落单时随维修记录一起带过去。 */
+  deviceModel: string | null;
   status: string;
   checkedInAt: string | null;
   servedAt: string | null;
@@ -81,6 +83,7 @@ function toStaffReg(row: {
   name: string;
   phone: string;
   issueType: string;
+  deviceModel: string | null;
   status: string;
   checkedInAt: Date | null;
   servedAt: Date | null;
@@ -95,6 +98,7 @@ function toStaffReg(row: {
     phoneMasked: maskActivityPhone(row.phone),
     issueType,
     issueTypeLabel: repairActivityIssueTypeLabels[issueType],
+    deviceModel: row.deviceModel,
     status: row.status,
     checkedInAt: row.checkedInAt?.toISOString() ?? null,
     servedAt: row.servedAt?.toISOString() ?? null,
@@ -441,6 +445,8 @@ export const repairActivityStaffService = {
           content,
           remark: ACTIVITY_SERVE_REMARK,
           durationMinutes: ACTIVITY_SERVE_DURATION_MINUTES,
+          // 报名时填的机型随记录带过去（issue #68）；没填就是 null。
+          deviceModel: reg.deviceModel,
           createRequestKey,
           registrationId,
           activityId,

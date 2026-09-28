@@ -44,16 +44,42 @@ export function sortRepairActivitiesForPublicList<T extends PublicListSortable>(
 }
 
 /**
- * 首页近场活动（UX R3 / R7）：方案 B 排序后取前 `limit` 条未结束活动。
- * 已结束不进入预览；调用方可先拿 listPublic 结果再喂入本函数。
+ * 首页预览的状态优先级：数字小者在前。
+ *
+ * 「还报得上名的」最该被看见 —— 只按 activityAt 升序时，报名已截止（CLOSED）
+ * 或已满（FULL）的活动会挤掉报名开放中（OPEN）的卡片。
+ */
+const HOME_PREVIEW_STATUS_PRIORITY: Record<RepairActivityStatus, number> = {
+  OPEN: 0,
+  UPCOMING: 1,
+  FULL: 2,
+  CLOSED: 3,
+  ENDED: 4,
+};
+
+/**
+ * 首页近场活动（UX R3 / R7）：按「报名开放中优先」取前 `limit` 条未结束活动。
+ *
+ * 优先级：OPEN → UPCOMING → 其余未结束状态（FULL / CLOSED），
+ * 同一档内按 activityAt 升序（次键与公开列表一致）；ENDED 一律不进预览。
+ *
+ * 与公开列表的「方案 B」是两个口径：公开列表必须整体按 activityAt 排序
+ * （验收写死），首页预览只关心「先给还报得上名的」。调用方可先拿 listPublic
+ * 结果再喂入本函数（这里会重新分档，不会改动入参）。
  */
 export function pickNonEndedRepairActivitiesForHomePreview<T extends PublicListSortable>(
   items: readonly T[],
   limit = 3,
 ): T[] {
   const n = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 3;
-  return sortRepairActivitiesForPublicList(items)
+  return items
     .filter((item) => item.status !== "ENDED")
+    .sort((a, b) => {
+      const byStatus =
+        HOME_PREVIEW_STATUS_PRIORITY[a.status] - HOME_PREVIEW_STATUS_PRIORITY[b.status];
+      if (byStatus !== 0) return byStatus;
+      const byActivityAt = toTime(a.activityAt) - toTime(b.activityAt);
+      return byActivityAt !== 0 ? byActivityAt : tieBreak(a, b);
+    })
     .slice(0, n);
 }
-

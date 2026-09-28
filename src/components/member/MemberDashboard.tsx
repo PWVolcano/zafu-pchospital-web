@@ -216,6 +216,7 @@ export function MemberDashboard({ initialDisplayName, roles }: MemberDashboardPr
             />
             <DashTile icon="heart" label={copy.quickFavorites} desc={copy.quickFavoritesDesc} href="/member/favorites" />
             <DashTile icon="trophy" label={copy.quickRankings} desc={copy.quickRankingsDesc} href="/member/rankings" />
+            <DashTile icon="book" label={copy.quickCases} desc={copy.quickCasesDesc} href="/member/cases" />
             <DashTile icon="edit" label={copy.quickProfile} desc={copy.quickProfileDesc} href="/member/profile" />
           </DashGroup>
 

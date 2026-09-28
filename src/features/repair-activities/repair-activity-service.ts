@@ -9,6 +9,7 @@ import { maskActivityPhone } from "@/features/repair-activities/phone-mask";
 import {
   assertActivityTimeRules,
   assertValidCapacity,
+  assertValidDeviceModel,
   assertValidIssueType,
   assertValidRegistrantName,
   assertValidTitle,
@@ -69,6 +70,8 @@ export type RegistrationPublicView = {
   name: string;
   phoneMasked: string;
   issueType: RepairActivityIssueType;
+  /** 机型，选填（issue #68）。 */
+  deviceModel: string | null;
   status: string;
   createdAt: string;
 };
@@ -84,6 +87,8 @@ export type RegistrationAdminView = {
   name: string;
   phone: string;
   issueType: RepairActivityIssueType;
+  /** 机型，选填（issue #68）。 */
+  deviceModel: string | null;
   status: string;
   createdAt: string;
   deletedAt: string | null;
@@ -164,6 +169,7 @@ function toRegistrationAdminView(row: {
   name: string;
   phone: string;
   issueType: string;
+  deviceModel: string | null;
   status: string;
   createdAt: Date;
   deletedAt: Date | null;
@@ -174,6 +180,7 @@ function toRegistrationAdminView(row: {
     name: row.name,
     phone: row.phone,
     issueType: assertValidIssueType(row.issueType),
+    deviceModel: row.deviceModel,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
     deletedAt: row.deletedAt?.toISOString() ?? null,
@@ -496,12 +503,19 @@ export const repairActivityService = {
 
   async register(
     activityId: string,
-    input: { name: string; phone: string; issueType: unknown; consentAccepted?: boolean },
+    input: {
+      name: string;
+      phone: string;
+      issueType: unknown;
+      deviceModel?: unknown;
+      consentAccepted?: boolean;
+    },
     context: PublicRequestContext,
   ): Promise<RegistrationPublicView> {
     const name = assertValidRegistrantName(input.name);
     const phone = normalizePhone(input.phone);
     const issueType = assertValidIssueType(input.issueType);
+    const deviceModel = assertValidDeviceModel(input.deviceModel);
     // 免责声明必须由报名者本人点过（issue #62 前端3）。
     // 前端弹层只是「把这件事问清楚」，真正拦住绕过弹层直接打接口的是这一句 ——
     // 报名接口是公开的，只在界面上拦等于没拦。
@@ -550,6 +564,7 @@ export const repairActivityService = {
           phone,
           phoneLast4: phone.slice(-4),
           issueType,
+          deviceModel,
           status: "REGISTERED",
           consentVersion: repairActivityConsentVersion,
           consentAcceptedAt: now,
@@ -566,6 +581,7 @@ export const repairActivityService = {
         after: {
           activityId,
           issueType,
+          deviceModel,
           phoneMasked: maskActivityPhone(phone),
           consentVersion: repairActivityConsentVersion,
         },
@@ -576,6 +592,7 @@ export const repairActivityService = {
         name: created.name,
         phoneMasked: maskActivityPhone(phone),
         issueType,
+        deviceModel,
         status: created.status,
         createdAt: created.createdAt.toISOString(),
       };
@@ -620,6 +637,7 @@ export const repairActivityService = {
       name: reg.name,
       phoneMasked: maskActivityPhone(phone),
       issueType: assertValidIssueType(reg.issueType),
+      deviceModel: reg.deviceModel,
       status: reg.status,
       createdAt: reg.createdAt.toISOString(),
       editToken: token.editToken,
@@ -692,6 +710,7 @@ export const repairActivityService = {
         name: updated.name,
         phoneMasked: maskActivityPhone(updated.phone),
         issueType,
+        deviceModel: updated.deviceModel,
         status: updated.status,
         createdAt: updated.createdAt.toISOString(),
       };
