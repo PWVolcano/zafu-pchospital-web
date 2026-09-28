@@ -196,8 +196,13 @@ test("已撤销的行：撤销按钮禁用，但仍在 DOM 里（不出现/消�
   const copy = admin.adminCopy.inviteCodes;
   const html = await render([REVOKED]);
 
-  // 状态标签换成「待处理」那一枚（已撤销在既有的两枚标签里就是这个）。
-  assert.ok(html.includes('<span class="repair-tag repair-tag--pending">'));
+  // 不可用状态改用中性标签（`fix(admin): 邀请码不可用状态改用中性标签` 起的口径），
+  // 文案仍是「已撤销」；两者成对断言，避免只改类名或只改文案时漏判。
+  assert.ok(
+    html.includes(
+      `<span class="admin-tag admin-tag--muted">${admin.inviteCodeStatusLabels.REVOKED}</span>`,
+    ),
+  );
 
   assert.match(buttonOf(html, copy.action.revoke), /disabled/, "已撤销的邀请码不该给出可点的撤销入口");
   // 对照组：「调整策略」不受状态影响，仍然可点。

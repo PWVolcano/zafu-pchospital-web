@@ -54,6 +54,8 @@
 │   │   ├── about/page.tsx     # /about
 │   │   ├── join/page.tsx      # /join
 │   │   ├── docs/page.tsx      # /docs
+│   │   ├── member/            # 登录后成员页（工作台 / 案例库 / 维修 / 活动 / 通知 / 个人主页）
+│   │   ├── admin/             # 管理后台页面（含 loading.tsx 骨架）
 │   │   ├── not-found.tsx      # 404
 │   │   ├── error.tsx          # 路由级错误边界（正文替换，骨架保留）
 │   │   ├── global-error.tsx   # 根布局级兜底（自带 html/body 与全局样式）
@@ -70,6 +72,8 @@
 │   │   ├── join/              # /join 的登记表区块（客户端组件）
 │   │   ├── member/            # 成员工作台区块
 │   │   ├── repairs/           # 维修列表 / 详情 / 表单
+│   │   ├── repair-activities/ # 活动列表 / 详情 / 接待台看板
+│   │   ├── cases/             # 成员案例库（/member/cases，只读翻阅已通过记录）
 │   │   └── community/         # 评论、通知、收藏、案例标记
 │   │
 │   ├── config/                # 站点配置与页面文案数据
@@ -82,6 +86,8 @@
 │   │   ├── join.ts            # /join 文案
 │   │   ├── member.ts          # 工作台与个人主页文案
 │   │   ├── repairs.ts         # 维修记录文案
+│   │   ├── repair-activities.ts # 活动文案、状态/故障类型标签、免责声明版本
+│   │   ├── cases.ts           # 案例库文案（筛选、空态、卡片字段）
 │   │   └── community.ts       # 评论 / 通知 / 收藏文案
 │   │
 │   ├── lib/                   # 无 UI 的纯逻辑
@@ -99,7 +105,8 @@
 │   │   ├── repairs/           # 维修草稿、审核、查询
 │   │   ├── member-dashboard/  # 工作台聚合
 │   │   ├── member-profile/    # 个人主页
-│   │   ├── skills/            # 技能标签
+│   │   ├── skills/            # 技能标签（读取 + 成员自建，issue #68）
+│   │   ├── repair-activities/ # 活动、公开报名、接待台（签到 / 落单 / 撤回）
 │   │   └── community/         # 评论、提及、收藏、通知
 │   ├── types/                 # 公共 Enum / API / Service Contract 唯一事实来源
 │   │

@@ -77,6 +77,8 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
 - `repair_reviews` 和 `repair_timeline_events` 只追加；退回审核意见必填。
 - 照片数据库只保存元数据与服务端 `storage_key`，文件不在 `public/` 下；照片访问继承维修记录可见性。
 - 分类使用稳定 `code` 幂等 Seed。停用分类不能用于新提交，但历史引用保留。
+- `device_model` 是选填机型（issue #68，可空 `VarChar(60)`）：活动报名时填写，接待落单时
+  **复制**进记录，此后两边独立。只用于展示，不参与统计口径、筛选或校验；手工建单一般为空。
 - 默认业务查询排除 `repair_records.deleted_at IS NOT NULL` 和已软删除照片。
 - 后续所有正式统计必须统一使用 `status = APPROVED AND deleted_at IS NULL`。查询条件的代码事实来源为
   `approvedRepairWhere()`；M2 分析入口 `listApprovedRepairsForAnalytics()` 与 M3 成员摘要均在其上追加范围条件。
@@ -92,6 +94,9 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
   不物理删除行；重新选择恢复同一行，保证历史可追溯且不产生重复记录。
 - 成员选择的技能上限为 12（`MEMBER_SKILL_LIMIT`），服务端为权威校验点。
 - 已停用技能不能新增关联，但既有保留不被静默删除。
+- 成员可自建标签（issue #68，业务确认无需审核），但只能提供名称（≤ 80 字符）：
+  库里已有同名启用标签时**复用该行**，已停用则拒绝（`SKILL_INACTIVE`）——
+  停用状态不能靠重新输入同一个名字复活；`code` / 描述 / 排序仍由系统或管理员决定。
 
 ## M3 成员资料契约
 
