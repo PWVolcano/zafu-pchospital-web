@@ -244,18 +244,80 @@ test("结果列只接受已完成/未完成，缺省为已完成", () => {
   assert.equal(plan.rejected[0]?.lineNo, 4);
 });
 
+test("storePendingUnmatched：姓名未在册的有效行进暂存，重名与字段无效仍拒收", () => {
+  const plan = classifyHistoryRows(
+    [
+      row(2, { name: "王五" }),
+      row(3, { name: "计算机233赵六" }),
+      row(4, { name: "李四" }),
+      row(5, { name: "钱七", repairDate: "2026/13/40" }),
+      row(6, { name: "孙八", durationMinutes: "一次" }),
+    ],
+    {
+      members,
+      categories,
+      today,
+      options: {
+        defaultDurationMinutes: 30,
+        fallbackCategoryId: "c-fallback",
+        storePendingUnmatched: true,
+      },
+    },
+  );
+  assert.equal(plan.valid.length, 0);
+  assert.deepEqual(
+    plan.pending.map((p) => [p.lineNo, p.realName, p.categoryId, p.durationMinutes]),
+    [
+      [2, "王五", "c-soft", 90],
+      [3, "赵六", "c-soft", 90],
+    ],
+  );
+  assert.match(
+    plan.pending[1]!.remark ?? "",
+    /班级前缀剥离（该成员尚未在册，暂存待认领）：计算机233赵六 → 赵六/,
+  );
+  assert.deepEqual(
+    plan.rejected.map((r) => r.lineNo),
+    [4, 5, 6],
+  );
+});
+
+test("暂存行与日后 CLI 直接导入算出同一指纹：先导入后注册也只落一条", () => {
+  const options = {
+    defaultDurationMinutes: 30,
+    fallbackCategoryId: "c-fallback",
+    storePendingUnmatched: true,
+  };
+  const beforeRegister = classifyHistoryRows([row(2, { name: "王五" })], {
+    members,
+    categories,
+    today,
+    options,
+  });
+  const afterRegister = classifyHistoryRows([row(2, { name: "王五" })], {
+    members: [...members, { profileId: "p-wang", realName: "王五" }],
+    categories,
+    today,
+    options,
+  });
+  assert.equal(beforeRegister.pending.length, 1);
+  assert.equal(afterRegister.valid.length, 1);
+  assert.equal(afterRegister.valid[0]!.idempotencyKey, beforeRegister.pending[0]!.fingerprint);
+  assert.equal(afterRegister.valid[0]!.memberProfileId, "p-wang");
+});
+
 test("行指纹稳定且随字段变化", () => {
   const base = {
-    memberProfileId: "p",
+    realName: "王五",
     categoryId: "c",
     repairDate: "2026-09-01",
     durationMinutes: 90,
     content: "x",
     result: "COMPLETED",
-    remark: null,
   };
   assert.equal(historyRowKey(base), historyRowKey({ ...base }));
   assert.notEqual(historyRowKey(base), historyRowKey({ ...base, durationMinutes: 91 }));
+  assert.notEqual(historyRowKey(base), historyRowKey({ ...base, realName: "张三" }));
   assert.ok(historyRowKey(base).startsWith("history-import:"));
   assert.ok(historyRowKey(base).length <= 128);
 });

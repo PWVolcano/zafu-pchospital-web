@@ -125,10 +125,31 @@ export type ValidHistoryRow = {
   idempotencyKey: string;
 };
 
+/**
+ * 姓名尚未在册、但其余字段全部有效的行（issue #72 评审 1）。
+ * 先落 `repair_history_pending` 暂存，等该姓名的新成员注册/建档后由自动补录认领；
+ * `fingerprint` 与 `ValidHistoryRow.idempotencyKey` 同一套算法（不含成员归属），
+ * 因此「暂存 → 认领」与「重跑 CLI 直接导入」天然去重，谁先到都不会重复入库。
+ */
+export type PendingHistoryRow = {
+  lineNo: number;
+  /** 匹配用的姓名：一格多人已取第一人、班级前缀已剥离（与导入口径一致）。 */
+  realName: string;
+  categoryId: string;
+  repairDate: string;
+  durationMinutes: number;
+  content: string;
+  result: "COMPLETED" | "NOT_COMPLETED";
+  remark: string | null;
+  fingerprint: string;
+};
+
 export type RejectedHistoryRow = { lineNo: number; reason: string };
 
 export type HistoryPlan = {
   valid: ValidHistoryRow[];
+  /** 仅当 `options.storePendingUnmatched` 时非空。 */
+  pending: PendingHistoryRow[];
   rejected: RejectedHistoryRow[];
 };
 
@@ -198,28 +219,37 @@ export function stripClassPrefixHistoryName(name: string): string | null {
   return match ? match[1] : null;
 }
 
-/** 行指纹：规范化字段做哈希，同一行重复导入天然幂等。 */
+/**
+ * 行指纹：规范化字段做哈希，同一行重复导入天然幂等。
+ *
+ * 只含**业务字段**，刻意排除两类东西：
+ * - 成员归属（`memberProfileId`）：同一条历史行在「导出时已建成员」与「注册后自动补录」
+ *   两条路径下必须得到同一个键 —— 否则同一条记录会被两边各写一次；
+ * - 备注（`remark`）：其中混着补录口径的留痕（默认时长、兜底分类等），换个 `--default-duration`
+ *   重跑就会因备注文本变化而算成新行，把「幂等」打破。备注不是业务标识字段。
+ */
 export function historyRowKey(row: {
-  memberProfileId: string;
+  realName: string;
   categoryId: string;
   repairDate: string;
   durationMinutes: number;
   content: string;
   result: string;
-  remark: string | null;
 }): string {
   const digest = createHash("sha256").update(JSON.stringify(row), "utf8").digest("hex");
   return `history-import:${digest}`;
 }
 
 /**
- * 按姓名匹配成员、按名称匹配分类，产出可导入行与逐行拒收原因。
+ * 按姓名匹配成员、按名称匹配分类，产出可导入行、待认领行与逐行拒收原因。
  * 重名（同名多位在册成员）不猜归属，整组拒收转人工。
  * 收集表实况适配（口径均经社团确认，issue #72）：
  * - 维修人员一格多人 → 归属第一人，原文进备注留痕；
  * - 姓名前粘连班级号（「计算机233蔡廷耀」）→ 剥离前缀后匹配，并在备注留痕；
  * - 无时长列/空值 → `options.defaultDurationMinutes` 补录并留痕；
- * - 无分类列/空值 → `options.fallbackCategoryId` 统一挂兜底分类并留痕。
+ * - 无分类列/空值 → `options.fallbackCategoryId` 统一挂兜底分类并留痕；
+ * - `options.storePendingUnmatched`（CLI `--apply` 用）：姓名尚未在册的行不拒收，
+ *   返回在 `pending` 里落暂存，等本人注册后自动补录（评审 1 的「只导入一次」）。
  */
 export function classifyHistoryRows(
   inputs: HistoryInputRow[],
@@ -227,7 +257,11 @@ export function classifyHistoryRows(
     members: HistoryMemberRef[];
     categories: HistoryCategoryRef[];
     today: string;
-    options?: { defaultDurationMinutes?: number; fallbackCategoryId?: string };
+    options?: {
+      defaultDurationMinutes?: number;
+      fallbackCategoryId?: string;
+      storePendingUnmatched?: boolean;
+    };
   },
 ): HistoryPlan {
   const byName = new Map<string, HistoryMemberRef[]>();
@@ -241,6 +275,7 @@ export function classifyHistoryRows(
   const options = refs.options ?? {};
 
   const valid: ValidHistoryRow[] = [];
+  const pending: PendingHistoryRow[] = [];
   const rejected: RejectedHistoryRow[] = [];
 
   for (const input of inputs) {
@@ -255,19 +290,28 @@ export function classifyHistoryRows(
     if (names.length > 1) notes.push(`维修人员一格多人，归属第一人；原格：${nameCell}`);
     const [firstName] = names;
     let candidates = byName.get(firstName) ?? [];
+    let resolvedName = firstName;
     if (candidates.length === 0) {
       const stripped = stripClassPrefixHistoryName(firstName);
       if (stripped) {
         candidates = byName.get(stripped) ?? [];
         if (candidates.length > 0) notes.push(`姓名按班级前缀剥离匹配：${firstName} → ${stripped}`);
+        else {
+          // 剥离结果没有对应在册成员：按剥离后的姓名暂存，等本人注册后认领。
+          resolvedName = stripped;
+          notes.push(
+            `姓名按班级前缀剥离（该成员尚未在册，暂存待认领）：${firstName} → ${stripped}`,
+          );
+        }
       }
-    }
-    if (candidates.length === 0) {
-      reject(`未找到在册成员：${firstName}`);
-      continue;
     }
     if (candidates.length > 1) {
       reject(`姓名重名，需人工确认归属：${firstName}`);
+      continue;
+    }
+    const unmatched = candidates.length === 0;
+    if (unmatched && !options.storePendingUnmatched) {
+      reject(`未找到在册成员：${firstName}`);
       continue;
     }
     const repairDate = normalizeHistoryDate(input.raw.repairDate ?? "");
@@ -343,7 +387,31 @@ export function classifyHistoryRows(
         continue;
       }
     }
+    if (unmatched) {
+      pending.push({
+        lineNo: input.lineNo,
+        realName: resolvedName,
+        categoryId,
+        repairDate,
+        durationMinutes,
+        content,
+        result,
+        remark,
+        fingerprint: historyRowKey({
+          realName: resolvedName,
+          categoryId,
+          repairDate,
+          durationMinutes,
+          content,
+          result,
+        }),
+      });
+      continue;
+    }
     const memberProfileId = candidates[0].profileId;
+    // 指纹用成员档案里的姓名（而非输入格里的写法）：与 pending 行的 realName 同一口径，
+    // 「暂存 → 认领」与「重跑 CLI」才能算出同一个键。
+    const realName = candidates[0].realName.trim();
     valid.push({
       lineNo: input.lineNo,
       memberProfileId,
@@ -354,15 +422,14 @@ export function classifyHistoryRows(
       result,
       remark,
       idempotencyKey: historyRowKey({
-        memberProfileId,
+        realName,
         categoryId,
         repairDate,
         durationMinutes,
         content,
         result,
-        remark,
       }),
     });
   }
-  return { valid, rejected };
+  return { valid, pending, rejected };
 }

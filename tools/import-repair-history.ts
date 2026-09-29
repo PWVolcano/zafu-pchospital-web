@@ -14,7 +14,10 @@ import {
   HISTORY_COLUMNS,
   type HistoryInputRow,
 } from "../src/features/repairs/repair-history-import";
-import { applyHistoryImport } from "../src/features/repairs/repair-history-import-service";
+import {
+  applyHistoryImport,
+  storePendingHistory,
+} from "../src/features/repairs/repair-history-import-service";
 
 /**
  * 历史修机数据导入（issue #72）。
@@ -33,9 +36,10 @@ import { applyHistoryImport } from "../src/features/repairs/repair-history-impor
  * - `--default-duration`：整列缺失或单行为空时按该分钟数补录并在备注留痕（社团口径：
  *   电脑医院收集表无时长列，按 30 分钟补）；
  * - 行指纹幂等：同一行重复执行只会跳过，不会重复入库；
- * - 「先修机、后注册」的的历史行首轮会按「未找到在册成员」拒收；等该成员建档
- *   入库后**对同一文件重跑 `--apply` 即可补录**——已导入行会被指纹跳过，只补新
- *   匹配上的行，无需手工挑行（PR #73 评审 4 的处理约定）；
+ * - 「先修机、后注册」的行（姓名尚未在册但字段有效）不再直接拒收：`--apply` 时存入
+ *   `repair_history_pending` 暂存表，该姓名的新成员在**邀请码注册 / 面试通过发放 /
+ *   管理端新增**建档后自动补录（source = history_import_claim，见评审 1）；
+ *   双保险：成员建档后对同一文件重跑 `--apply` 也能补，已入库行会被指纹跳过；
  * - 时长解析与多人格归属的口径集中在 repair-history-import.ts 的注释里，均经社团
  *   确认（维修人员列→第一人；纯数字 ≤12 按小时、>12 按分钟），脚本不额外猜列。
  */
@@ -226,12 +230,27 @@ async function main(): Promise<void> {
     options: {
       defaultDurationMinutes: defaultDuration,
       fallbackCategoryId: fallbackId,
+      // 姓名尚未在册的行不直接拒收：字段有效就先暂存，等本人注册后自动补录（评审 1）。
+      storePendingUnmatched: true,
     },
   });
 
-  console.log(`总行数 ${inputs.length}：可导入 ${plan.valid.length}，拒收 ${plan.rejected.length}`);
+  console.log(
+    `总行数 ${inputs.length}：可导入 ${plan.valid.length}，暂存待认领 ${plan.pending.length}（姓名尚未在册），拒收 ${plan.rejected.length}`,
+  );
   for (const row of plan.rejected) console.log(`  第 ${row.lineNo} 行：${row.reason}`);
-  if (!plan.valid.length) {
+  if (plan.pending.length > 0) {
+    const pendingNames = new Map<string, number>();
+    for (const row of plan.pending)
+      pendingNames.set(row.realName, (pendingNames.get(row.realName) ?? 0) + 1);
+    console.log(
+      `暂存名单（对该文件重跑 --apply 也能补）：${[...pendingNames.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, count]) => `${name}×${count}`)
+        .join("、")}`,
+    );
+  }
+  if (!plan.valid.length && !plan.pending.length) {
     console.log("没有可导入的行。");
     await disconnectDb();
     return;
@@ -243,7 +262,11 @@ async function main(): Promise<void> {
   }
   const actor = await authorizeUser(actorArg, { requestId: `history-import-${Date.now()}` });
   const result = await applyHistoryImport(plan.valid, actor);
-  console.log(`导入完成：新增 ${result.inserted} 条，重复跳过 ${result.skipped} 条。`);
+  const pendingResult = await storePendingHistory(plan.pending, actor, file);
+  console.log(
+    `导入完成：新增 ${result.inserted} 条，重复跳过 ${result.skipped} 条；` +
+      `暂存待认领 ${pendingResult.stored} 条（重复跳过 ${pendingResult.skipped} 条）。`,
+  );
   await disconnectDb();
 }
 

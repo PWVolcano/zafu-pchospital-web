@@ -54,6 +54,7 @@ before(async () => {
   await db.repairReview.deleteMany();
   await db.repairPhoto.deleteMany();
   await db.repairRecord.deleteMany();
+  await db.repairHistoryPending.deleteMany();
   await db.repairCategory.deleteMany();
   await db.authSession.deleteMany();
   await db.loginThrottle.deleteMany();
