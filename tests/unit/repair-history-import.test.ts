@@ -4,7 +4,9 @@ import {
   classifyHistoryRows,
   historyRowKey,
   mapHistoryHeader,
+  normalizeHistoryDate,
   parseDelimitedRows,
+  parseHistoryDuration,
   type HistoryInputRow,
 } from "../../src/features/repairs/repair-history-import";
 
@@ -51,7 +53,43 @@ test("表头按别名识别，缺列时报出缺失项", () => {
   assert.equal(fields.content, 5);
   assert.equal(fields.remark, 6);
   const short = mapHistoryHeader(["姓名", "日期"]);
-  assert.deepEqual(short.missing, ["durationMinutes", "categoryName", "content"]);
+  assert.deepEqual(short.missing, ["content"]);
+});
+
+test("真实收集表表头（带（必填）后缀）可识别，无时长/分类列不算缺列", () => {
+  const repair = mapHistoryHeader([
+    "提交时间（自动）",
+    "机主姓名（必填）",
+    "机主联系电话（必填）",
+    "机主班级（必填）",
+    "维修人员姓名（必填）",
+    "故障（必填）",
+    "维修时长（必填）",
+    "请机主加入交流群",
+    "提交者（自动）",
+  ]);
+  assert.deepEqual(repair.missing, []);
+  assert.equal(repair.fields.repairDate, 0);
+  assert.equal(repair.fields.name, 4);
+  assert.equal(repair.fields.content, 5);
+  assert.equal(repair.fields.durationMinutes, 6);
+  assert.equal(repair.fields.categoryName, undefined);
+
+  const clinic = mapHistoryHeader([
+    "提交时间（自动）",
+    "公益电脑维修服务免责声明书（必填）",
+    "官方群",
+    "机主姓名（必填）",
+    "机主联系电话（必填）",
+    "机主班级（必填）",
+    "维修人员（必填）",
+    "故障（必填）",
+    "机型 颜色（必填）",
+    "提交者（自动）",
+  ]);
+  assert.deepEqual(clinic.missing, []);
+  assert.equal(clinic.fields.name, 6);
+  assert.equal(clinic.fields.durationMinutes, undefined);
 });
 
 test("CSV 解析支持引号、逗号、CRLF 与 BOM", () => {
@@ -102,17 +140,98 @@ test("日期、时长、分类与正文逐行校验", () => {
     { members, categories, today },
   );
   // 斜杠日期规范化、分钟后缀容忍、停用分类拒收。
+  // 纯数字 1.5（≤12）按社团口径解释为 1.5 小时 = 90 分钟。
   assert.deepEqual(
     plan.valid.map((v) => [v.lineNo, v.repairDate, v.durationMinutes]),
     [
       [2, "2026-09-05", 90],
+      [7, "2026-09-01", 90],
       [8, "2026-09-01", 45],
     ],
   );
   assert.deepEqual(
     plan.rejected.map((r) => r.lineNo),
-    [3, 4, 5, 6, 7, 9, 10, 11],
+    [3, 4, 5, 6, 9, 10, 11],
   );
+});
+
+test("时长文本按社团口径解析：分钟/小时/半小时/两小时/复合/纯数字分界", () => {
+  const cases: [string, number | null][] = [
+    ["30分钟", 30],
+    ["30min", 30],
+    ["15mins", 15],
+    ["30分", 30],
+    ["40min左右", 40],
+    ["1h", 60],
+    ["1小时", 60],
+    ["1个小时", 60],
+    ["0.5h", 30],
+    ["半小时", 30],
+    ["两个小时", 120],
+    ["1小时05分", 65],
+    ["1小时10分", 70],
+    ["60", 60], // 纯数字 >12 按分钟
+    ["20", 20],
+    ["1", 60], // 纯数字 ≤12 按小时
+    ["12", 720],
+    ["13", 13],
+    ["一次", null],
+    ["1次", null],
+    ["十五min", null],
+    ["", null],
+  ];
+  for (const [text, expected] of cases) assert.equal(parseHistoryDuration(text), expected, text);
+});
+
+test("日期允许带时间尾巴（提交时间列）", () => {
+  assert.equal(normalizeHistoryDate("2024-10-08 19:18:01"), "2024-10-08");
+  assert.equal(normalizeHistoryDate("2024/9/5 8:00"), "2024-09-05");
+  assert.equal(normalizeHistoryDate("2024-10-08 19:18"), "2024-10-08");
+  assert.equal(normalizeHistoryDate("2024-10-08 abc"), null);
+});
+
+test("一格多名维修人员归属第一人并留痕；班级前缀姓名剥离匹配", () => {
+  const plan = classifyHistoryRows(
+    [
+      row(2, { name: "张三，莫依诚，王五" }),
+      row(3, { name: "计算机233张三" }),
+      row(4, { name: "张三 郭文辉" }),
+    ],
+    { members, categories, today },
+  );
+  assert.equal(plan.valid.length, 3);
+  assert.deepEqual(
+    plan.valid.map((v) => v.memberProfileId),
+    ["p-zhang", "p-zhang", "p-zhang"],
+  );
+  assert.match(plan.valid[0]!.remark ?? "", /维修人员一格多人，归属第一人/);
+  assert.match(plan.valid[0]!.remark ?? "", /原格：张三，莫依诚，王五/);
+  assert.match(plan.valid[1]!.remark ?? "", /班级前缀剥离匹配：计算机233张三 → 张三/);
+  assert.match(plan.valid[2]!.remark ?? "", /一格多人/);
+});
+
+test("缺时长列/缺分类列按社团口径补录，未给口径则逐行拒收", () => {
+  const withOptions = classifyHistoryRows(
+    [row(2, { durationMinutes: undefined, categoryName: undefined })],
+    {
+      members,
+      categories,
+      today,
+      options: { defaultDurationMinutes: 30, fallbackCategoryId: "c-fallback" },
+    },
+  );
+  assert.equal(withOptions.valid.length, 1);
+  assert.equal(withOptions.valid[0].durationMinutes, 30);
+  assert.equal(withOptions.valid[0].categoryId, "c-fallback");
+  assert.match(withOptions.valid[0].remark ?? "", /时长缺失，按默认 30 分钟补录/);
+  assert.match(withOptions.valid[0].remark ?? "", /故障分类挂兜底分类/);
+
+  const withoutOptions = classifyHistoryRows(
+    [row(2, { durationMinutes: undefined, categoryName: undefined })],
+    { members, categories, today },
+  );
+  assert.equal(withoutOptions.valid.length, 0);
+  assert.match(withoutOptions.rejected[0]?.reason ?? "", /缺少维修时长/);
 });
 
 test("结果列只接受已完成/未完成，缺省为已完成", () => {
