@@ -321,7 +321,9 @@ export function RepairEditor({
               {repairEditorCopy.contentHint}
             </span>
           </label>
-          <p className="field__hint">{repairEditorCopy.requiredNote}</p>
+          <p className="field__hint">
+            {allowSaveDraft ? repairEditorCopy.requiredNote : repairEditorCopy.requiredNoteCreate}
+          </p>
           <p className="field__hint">
             维修结果默认为「{repairResultLabels[defaultRepairResult]}」，保存与提交都会按此记录。
           </p>

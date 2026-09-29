@@ -21,14 +21,12 @@ export async function applyHistoryImport(
   let inserted = 0;
   let skipped = 0;
   for (const row of rows) {
-    await inSerializableTransaction(async (tx) => {
+    // 计数放在事务外：可序列化事务遇 P2034 会重跑回调，事务内累加会重复计数（PR #73 评审）。
+    const outcome = await inSerializableTransaction(async (tx) => {
       const existing = await tx.repairRecord.findUnique({
         where: { createRequestKey: row.idempotencyKey },
       });
-      if (existing) {
-        skipped += 1;
-        return;
-      }
+      if (existing) return "skipped" as const;
       const recordId = randomUUID();
       const now = new Date();
       await tx.repairRecord.create({
@@ -93,8 +91,10 @@ export async function applyHistoryImport(
           status: "APPROVED",
         },
       });
-      inserted += 1;
+      return "inserted" as const;
     });
+    if (outcome === "inserted") inserted += 1;
+    else skipped += 1;
   }
   return { inserted, skipped };
 }

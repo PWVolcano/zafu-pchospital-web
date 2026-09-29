@@ -78,6 +78,12 @@ Repository / Service 的默认读取必须加 `deletedAt: null`。身份采用�
 - `repair_reviews` 和 `repair_timeline_events` 只追加；退回审核意见必填。
 - 照片数据库只保存元数据与服务端 `storage_key`，文件不在 `public/` 下；照片访问继承维修记录可见性。
 - 分类使用稳定 `code` 幂等 Seed。停用分类不能用于新提交，但历史引用保留。
+- 历史修机数据导入（issue #72，`tools/import-repair-history.ts`）走独立落库通道：按姓名匹配
+  **在册活跃成员**、按名称匹配启用分类，通过后直接落 `APPROVED`（无照片、不走 `repair_reviews`），
+  以 timeline 三条事件与 `repair.history_imported` 审计标注来源 `history_import`。逐行指纹
+  （`create_request_key = history-import:{sha256}`）幂等，重复导入同一行只跳过不重复入库。
+  「修机时尚未建档」的成员属预期情形：首轮按「未找到在册成员」拒收，**待其建档后对同一文件重跑
+  导入即可补录**（已入库行被指纹跳过），不需要为补人而重导整表。
 - `device_model` 是选填机型（issue #68，可空 `VarChar(60)`）：活动报名时填写，接待落单时
   **复制**进记录，此后两边独立。只用于展示，不参与统计口径、筛选或校验；手工建单一般为空。
 - 默认业务查询排除 `repair_records.deleted_at IS NOT NULL` 和已软删除照片。

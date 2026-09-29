@@ -22,16 +22,26 @@ import { applyHistoryImport } from "../src/features/repairs/repair-history-impor
  * - 确认报告没问题后加 `--apply` 真正导入；`--actor` 必须是拥有 `repair:review`
  *   权限的管理员用户 ID（写审计用）；
  * - 行指纹幂等：同一行重复执行只会跳过，不会重复入库；
+ * - 「先修机、后注册」的的历史行首轮会按「未找到在册成员」拒收；等该成员建档
+ *   入库后**对同一文件重跑 `--apply` 即可补录**——已导入行会被指纹跳过，只补新
+ *   匹配上的行，无需手工挑行（PR #73 评审 4 的处理约定）；
  * - 列名按常见叫法匹配（见 repair-history-import.ts 的别名表），与腾讯文档实际
  *   导出表头对不上时先改导出的表头或补充名，脚本不会猜列。
  */
 
-async function readRows(file: string, text: string): Promise<string[][]> {
-  if (file.endsWith(".csv")) return parseDelimitedRows(text);
-  if (file.endsWith(".xlsx")) {
+async function readRows(file: string, buffer: Buffer): Promise<string[][]> {
+  const ext = file.toLowerCase();
+  if (ext.endsWith(".csv")) {
+    const text = buffer.toString("utf8");
+    // 腾讯文档/Excel 另存的 CSV 常见 GBK 编码，按 UTF-8 解码会出现替换符乱码。
+    if (text.includes("\uFFFD"))
+      throw new Error("CSV 疑似非 UTF-8 编码（可能出现乱码），请另存为 UTF-8 CSV 后重试。");
+    return parseDelimitedRows(text);
+  }
+  if (ext.endsWith(".xlsx")) {
     const { default: ExcelJS } = await import("exceljs");
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(Buffer.from(await readFile(file)) as unknown as ArrayBuffer);
+    await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
     const sheet = workbook.worksheets[0];
     if (!sheet) throw new Error("xlsx 里没有工作表");
     const rows: string[][] = [];
@@ -78,8 +88,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  const text = await readFile(file, "utf8");
-  const rows = await readRows(file, text);
+  const buffer = await readFile(file);
+  const rows = await readRows(file, buffer);
   if (rows.length < 2) {
     console.error("文件里只有表头或为空，没有可导入的数据行。");
     process.exitCode = 1;

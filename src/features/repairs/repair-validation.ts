@@ -13,6 +13,19 @@ export function normalizeDraftFields(input: RepairDraftFields): RepairDraftField
   };
 }
 
+/** 建档请求是否完全空白（新建页的 `POST {}`）：空请求可以复用成员已有的空白草稿。 */
+export function isBlankDraftFields(input: RepairDraftFields): boolean {
+  const blank = (value: unknown) => value === undefined || value === null || value === "";
+  return (
+    blank(input.repairDate) &&
+    blank(input.durationMinutes) &&
+    blank(input.categoryId) &&
+    blank(input.content) &&
+    blank(input.result) &&
+    blank(input.remark)
+  );
+}
+
 export function validateDraftFields(input: RepairDraftFields): void {
   const errors: Record<string, string[]> = {};
   if (input.repairDate != null && !isDate(input.repairDate)) {
