@@ -1,0 +1,2690 @@
+{
+  "head": "6df073af73649f57148f63c7b4e546bc4defa91f",
+  "change": "exclude activity board title from generic narrow workspace rule",
+  "rows": [
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "admin-390-normal-after.png",
+      "title": "管理后台",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 390,
+      "mode": "normal",
+      "version": "before",
+      "file": "board-390-normal-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 20,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 46,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 46,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 46,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 46,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "board-390-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 22.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 46,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 46,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 46,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 46,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 390,
+      "mode": "normal",
+      "version": "base",
+      "file": "public-390-normal-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 55.125,
+          "width": 63.421875
+        },
+        {
+          "text": "返回修改",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 55.125,
+          "width": 147.828125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "public-390-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 55.125,
+          "width": 63.421875
+        },
+        {
+          "text": "返回修改",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 55.125,
+          "width": 147.828125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "admin-390-dark-after.png",
+      "title": "管理后台",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 390,
+      "mode": "dark",
+      "version": "before",
+      "file": "board-390-dark-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 20,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 46,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 46,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 46,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 46,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "board-390-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 22.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 46,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 46,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 46,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 46,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 390,
+      "mode": "dark",
+      "version": "base",
+      "file": "public-390-dark-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 55.125,
+          "width": 63.421875
+        },
+        {
+          "text": "返回修改",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 55.125,
+          "width": 147.828125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "public-390-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 55.125,
+          "width": 63.421875
+        },
+        {
+          "text": "返回修改",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 55.125,
+          "width": 147.828125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "admin-768-normal-after.png",
+      "title": "管理后台",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 768,
+      "mode": "normal",
+      "version": "before",
+      "file": "board-768-normal-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 20,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 55.125,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 55.125,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 55.125,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "board-768-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 22.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 55.125,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 55.125,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 55.125,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 768,
+      "mode": "normal",
+      "version": "base",
+      "file": "public-768-normal-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "public-768-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "admin-768-dark-after.png",
+      "title": "管理后台",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 768,
+      "mode": "dark",
+      "version": "before",
+      "file": "board-768-dark-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 20,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 55.125,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 55.125,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 55.125,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "board-768-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 22.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "返回活动列表",
+          "height": 55.125,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 55.125,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 55.125,
+          "width": 107.28125
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 768,
+      "mode": "dark",
+      "version": "base",
+      "file": "public-768-dark-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "public-768-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 28,
+      "padding": "160px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "admin-1440-normal-after.png",
+      "title": "管理后台",
+      "titleSize": 30.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 1440,
+      "mode": "normal",
+      "version": "before",
+      "file": "board-1440-normal-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 34.2,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "返回活动列表",
+          "height": 36,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 36,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 36,
+          "width": 107.28125
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "收起记录",
+          "height": 36,
+          "width": 90.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "撤销接待",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "board-1440-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 34.2,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "返回活动列表",
+          "height": 36,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 36,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 36,
+          "width": 107.28125
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "收起记录",
+          "height": 36,
+          "width": 90.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "撤销接待",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 1440,
+      "mode": "normal",
+      "version": "base",
+      "file": "public-1440-normal-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 42.75,
+      "padding": "40px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "public-1440-normal-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 42.75,
+      "padding": "40px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "admin",
+      "label": "后台首页",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "admin-1440-dark-after.png",
+      "title": "管理后台",
+      "titleSize": 30.4,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 1440,
+      "mode": "dark",
+      "version": "before",
+      "file": "board-1440-dark-before.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 34.2,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "返回活动列表",
+          "height": 36,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 36,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 36,
+          "width": 107.28125
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "收起记录",
+          "height": 36,
+          "width": 90.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "撤销接待",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "board",
+      "label": "活动看板",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "board-1440-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 34.2,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "返回活动列表",
+          "height": 36,
+          "width": 89.5
+        },
+        {
+          "text": "出勤成员 3 人",
+          "height": 36,
+          "width": 118.34375
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "签到入队",
+          "height": 36,
+          "width": 107.28125
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "接待",
+          "height": 36,
+          "width": 65.828125
+        },
+        {
+          "text": "撤回",
+          "height": 36,
+          "width": 35.421875
+        },
+        {
+          "text": "收起记录",
+          "height": 36,
+          "width": 90.46875
+        },
+        {
+          "text": "",
+          "height": 36,
+          "width": 46
+        },
+        {
+          "text": "撤销接待",
+          "height": 36,
+          "width": 62.46875
+        },
+        {
+          "text": "立即刷新",
+          "height": 36,
+          "width": 62.46875
+        }
+      ],
+      "inputs": [
+        48.375
+      ]
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 1440,
+      "mode": "dark",
+      "version": "base",
+      "file": "public-1440-dark-base.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 42.75,
+      "padding": "40px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "public",
+      "label": "公开报名确认窗",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "public-1440-dark-after.png",
+      "title": "电脑医院周四义务维修活动",
+      "titleSize": 42.75,
+      "padding": "40px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "关闭",
+          "height": 29.53125,
+          "width": 68.125
+        },
+        {
+          "text": "返回修改",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "我已阅读并同意",
+          "height": 29.53125,
+          "width": 112.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "members-390-normal-after.png",
+      "title": "成员管理",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增成员",
+          "height": 55.125,
+          "width": 108.09375
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "选择",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "导出",
+          "height": 46,
+          "width": 56
+        },
+        {
+          "text": "更多",
+          "height": 46,
+          "width": 56
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "repairs-390-normal-after.png",
+      "title": "维修审核",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "选择",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "导出",
+          "height": 46,
+          "width": 56
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        }
+      ],
+      "inputs": [
+        46
+      ]
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 390,
+      "mode": "normal",
+      "version": "after",
+      "file": "member-390-normal-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "members-390-dark-after.png",
+      "title": "成员管理",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增成员",
+          "height": 55.125,
+          "width": 108.09375
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "选择",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "导出",
+          "height": 46,
+          "width": 56
+        },
+        {
+          "text": "更多",
+          "height": 46,
+          "width": 56
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "repairs-390-dark-after.png",
+      "title": "维修审核",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "选择",
+          "height": 46,
+          "width": 46
+        },
+        {
+          "text": "导出",
+          "height": 46,
+          "width": 56
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 46
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 46
+        }
+      ],
+      "inputs": [
+        46
+      ]
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 390,
+      "mode": "dark",
+      "version": "after",
+      "file": "member-390-dark-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "members-768-normal-after.png",
+      "title": "成员管理",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "批量启用",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "批量禁用",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "取消选择",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 55.125,
+          "width": 194.0625
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 55.125,
+          "width": 201.90625
+        },
+        {
+          "text": "账号邮箱",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "账号恢复",
+          "height": 55.125,
+          "width": 135.28125
+        },
+        {
+          "text": "新增成员",
+          "height": 55.125,
+          "width": 135.28125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "repairs-768-normal-after.png",
+      "title": "维修审核",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "批量通过",
+          "height": 55.125,
+          "width": 135.28125
+        },
+        {
+          "text": "批量退回",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "取消选择",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 55.125,
+          "width": 194.0625
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 55.125,
+          "width": 201.90625
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 768,
+      "mode": "normal",
+      "version": "after",
+      "file": "member-768-normal-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "members-768-dark-after.png",
+      "title": "成员管理",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "批量启用",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "批量禁用",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "取消选择",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 55.125,
+          "width": 194.0625
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 55.125,
+          "width": 201.90625
+        },
+        {
+          "text": "账号邮箱",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "账号恢复",
+          "height": 55.125,
+          "width": 135.28125
+        },
+        {
+          "text": "新增成员",
+          "height": 55.125,
+          "width": 135.28125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "repairs-768-dark-after.png",
+      "title": "维修审核",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "搜索",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "更多筛选",
+          "height": 55.125,
+          "width": 90.46875
+        },
+        {
+          "text": "高级",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "批量通过",
+          "height": 55.125,
+          "width": 135.28125
+        },
+        {
+          "text": "批量退回",
+          "height": 55.125,
+          "width": 107.28125
+        },
+        {
+          "text": "取消选择",
+          "height": 55.125,
+          "width": 62.46875
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 55.125,
+          "width": 194.0625
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 55.125,
+          "width": 201.90625
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "通过",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "退回",
+          "height": 55.125,
+          "width": 35.421875
+        },
+        {
+          "text": "详情",
+          "height": 55.125,
+          "width": 35.421875
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 768,
+      "mode": "dark",
+      "version": "after",
+      "file": "member-768-dark-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 20,
+      "padding": "24px",
+      "overflow": false,
+      "pointer": "coarse",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 87.921875
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "members-1440-normal-after.png",
+      "title": "成员管理",
+      "titleSize": 22.8,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "搜索",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "更多筛选",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "高级",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "批量启用",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "批量禁用",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "取消选择",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 29.53125,
+          "width": 151.859375
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 29.53125,
+          "width": 159.453125
+        },
+        {
+          "text": "账号邮箱",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "账号恢复",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "新增成员",
+          "height": 29.53125,
+          "width": 94.640625
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "repairs-1440-normal-after.png",
+      "title": "维修审核",
+      "titleSize": 22.8,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "搜索",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "更多筛选",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "高级",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "批量通过",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "批量退回",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "取消选择",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 29.53125,
+          "width": 151.859375
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 29.53125,
+          "width": 159.453125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 1440,
+      "mode": "normal",
+      "version": "after",
+      "file": "member-1440-normal-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 30.4,
+      "padding": "100px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "members",
+      "label": "成员管理",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "members-1440-dark-after.png",
+      "title": "成员管理",
+      "titleSize": 22.8,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "搜索",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "更多筛选",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "高级",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "批量启用",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "批量禁用",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "取消选择",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 29.53125,
+          "width": 151.859375
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 29.53125,
+          "width": 159.453125
+        },
+        {
+          "text": "账号邮箱",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "账号恢复",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "新增成员",
+          "height": 29.53125,
+          "width": 94.640625
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "repairs",
+      "label": "维修审核",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "repairs-1440-dark-after.png",
+      "title": "维修审核",
+      "titleSize": 22.8,
+      "padding": "16px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "搜索",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "更多筛选",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "高级",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "批量通过",
+          "height": 29.53125,
+          "width": 94.640625
+        },
+        {
+          "text": "批量退回",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "取消选择",
+          "height": 29.53125,
+          "width": 72.640625
+        },
+        {
+          "text": "导出当前结果 CSV",
+          "height": 29.53125,
+          "width": 151.859375
+        },
+        {
+          "text": "导出当前结果 XLSX",
+          "height": 29.53125,
+          "width": 159.453125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "通过",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "退回",
+          "height": 29.53125,
+          "width": 46.125
+        },
+        {
+          "text": "详情",
+          "height": 29.53125,
+          "width": 46.125
+        }
+      ],
+      "inputs": []
+    },
+    {
+      "view": "member",
+      "label": "成员工作台",
+      "width": 1440,
+      "mode": "dark",
+      "version": "after",
+      "file": "member-1440-dark-after.png",
+      "title": "下午好，示例成员甲",
+      "titleSize": 30.4,
+      "padding": "100px",
+      "overflow": false,
+      "pointer": "fine",
+      "buttons": [
+        {
+          "text": "返回官网",
+          "height": 53.375,
+          "width": 187
+        },
+        {
+          "text": "新增维修记录",
+          "height": 55.125,
+          "width": 134.3125
+        },
+        {
+          "text": "编辑技能标签",
+          "height": 55.125,
+          "width": 89.5
+        }
+      ],
+      "inputs": []
+    }
+  ],
+  "errors": [],
+  "extra": [
+    {
+      "width": 768,
+      "pointer": "fine",
+      "heights": [
+        53.375,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125,
+        29.53125
+      ],
+      "overflow": false,
+      "peek": [
+        {
+          "visible": "0",
+          "width": 38.375,
+          "height": 21.6875
+        },
+        {
+          "visible": "0",
+          "width": 38.375,
+          "height": 21.6875
+        },
+        {
+          "visible": "0",
+          "width": 38.375,
+          "height": 21.6875
+        },
+        {
+          "visible": "0",
+          "width": 38.375,
+          "height": 21.6875
+        }
+      ],
+      "grip": "flex"
+    },
+    {
+      "width": 1440,
+      "pointer": "coarse",
+      "heights": [
+        53.375,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125,
+        55.125
+      ],
+      "overflow": false,
+      "peek": [
+        {
+          "visible": "1",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "visible": "1",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "visible": "1",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "visible": "1",
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "grip": "none"
+    }
+  ],
+  "publicConfirmDensityUnchanged": true
+}
